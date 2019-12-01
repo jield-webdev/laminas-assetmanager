@@ -1,56 +1,62 @@
 {
-    "name": "rwoverdijk/assetmanager",
-    "description": "An assetmanager module for Zend Framework 2.",
-    "license": "BSD-2-Clause",
-    "type": "library",
-    "keywords": [
-        "asset",
-        "asset manager",
-        "zf2",
-        "zend framework 2"
-    ],
-    "homepage": "https://github.com/RWOverdijk/AssetManager",
-    "authors": [
-        {
-            "name": "Wesley Overdijk",
-            "email": "r.w.overdijk@gmail.com",
-            "homepage": "http://blog.spoonx.nl/"
-        },
-        {
-            "name": "Marco Pivetta",
-            "email": "ocramius@gmail.com",
-            "homepage": "http://ocramius.github.com/"
-        }
-    ],
-    "require": {
-        "php": "^5.5 || ^7.0",
-        "zendframework/zend-modulemanager": "^2.7.2",
-        "zendframework/zend-stdlib": "^2.7.7 || ^3.0.1",
-        "zendframework/zend-servicemanager": "^2.7.6 || ^3.1.1",
-        "zendframework/zend-loader": "^2.5.1",
-        "zendframework/zend-eventmanager": "^2.6.3 || ^3.0.1",
-        "zendframework/zend-mvc": "^2.7.9 || ^3.0.2",
-        "kriswallsmith/assetic": "^1.4.0"
+  "name": "rwoverdijk/assetmanager",
+  "description": "An assetmanager module for Zend Framework 2.",
+  "license": "BSD-2-Clause",
+  "type": "library",
+  "keywords": [
+    "asset",
+    "asset manager",
+    "zf2",
+    "zend framework 2"
+  ],
+  "homepage": "https://github.com/RWOverdijk/AssetManager",
+  "authors": [
+    {
+      "name": "Wesley Overdijk",
+      "email": "r.w.overdijk@gmail.com",
+      "homepage": "http://blog.spoonx.nl/"
     },
-    "require-dev": {
-        "zendframework/zend-http": "^2.5.4",
-        "zendframework/zend-view": "^2.8.1",
-        "zendframework/zend-cache": "^2.7.1",
-        "zendframework/zend-console": "^2.6",
-        "phpunit/phpunit": "^4.8",
-        "squizlabs/php_codesniffer": "~1.5.0"
-    },
-    "suggest": {
-        "zendframework/zend-mvc-console": "zend-mvc-console provides the ability to expose zend-mvc as a console application"
-    },
-    "autoload": {
-        "psr-0": {
-            "AssetManager": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-0": {
-            "AssetManagerTest": "tests"
-        }
+    {
+      "name": "Marco Pivetta",
+      "email": "ocramius@gmail.com",
+      "homepage": "http://ocramius.github.com/"
     }
+  ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/greatislander/assetic"
+    }
+  ],
+  "require": {
+    "php": "^7.2",
+    "zendframework/zend-modulemanager": "^2.7.2",
+    "zendframework/zend-stdlib": "^2.7.7 || ^3.0.1",
+    "zendframework/zend-servicemanager": "^2.7.6 || ^3.1.1",
+    "zendframework/zend-loader": "^2.5.1",
+    "zendframework/zend-eventmanager": "^2.6.3 || ^3.0.1",
+    "zendframework/zend-mvc": "^2.7.9 || ^3.0.2",
+    "kriswallsmith/assetic": "dev-update-scss-php"
+  },
+  "require-dev": {
+    "zendframework/zend-http": "^2.5.4",
+    "zendframework/zend-view": "^2.8.1",
+    "zendframework/zend-cache": "^2.7.1",
+    "zendframework/zend-console": "^2.6",
+    "phpunit/phpunit": "^4.8",
+    "squizlabs/php_codesniffer": "~1.5.0"
+  },
+  "suggest": {
+    "zendframework/zend-mvc-console": "zend-mvc-console provides the ability to expose zend-mvc as a console application"
+  },
+  "autoload": {
+    "psr-0": {
+      "AssetManager": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-0": {
+      "AssetManagerTest": "tests"
+    }
+  }
 }
