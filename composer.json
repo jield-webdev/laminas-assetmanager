@@ -30,6 +30,7 @@
   ],
   "require": {
     "php": "^7.2",
+    "scssphp/scssphp": "~1.0",
     "zendframework/zend-modulemanager": "^2.7.2",
     "zendframework/zend-stdlib": "^2.7.7 || ^3.0.1",
     "zendframework/zend-servicemanager": "^2.7.6 || ^3.1.1",
