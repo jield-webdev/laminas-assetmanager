@@ -2,88 +2,88 @@
 
 namespace AssetManagerTest\Cache;
 
-use AssetManager\Cache\ZendCacheAdapter;
-use Zend\Cache\Storage\Adapter\Memory;
+use AssetManager\Cache\LaminasCacheAdapter;
+use Laminas\Cache\Storage\Adapter\Memory;
 
 /**
- * Test file for Zend Cache Adapter
+ * Test file for Laminas Cache Adapter
  *
  * @package AssetManager\Cache
  */
-class ZendCacheAdapterTest extends \PHPUnit_Framework_TestCase
+class LaminasCacheAdapterTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstructor()
     {
-        $mockZendCache = $this->getMockBuilder(Memory::class)
+        $mockLaminasCache = $this->getMockBuilder(Memory::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $adapter = new ZendCacheAdapter($mockZendCache);
+        $adapter = new LaminasCacheAdapter($mockLaminasCache);
 
-        $this->assertInstanceOf(ZendCacheAdapter::class, $adapter);
+        $this->assertInstanceOf(LaminasCacheAdapter::class, $adapter);
     }
 
     /**
      * @expectedException \PHPUnit_Framework_Error
      */
-    public function testConstructorOnlyAcceptsAZendCacheStorageInterface()
+    public function testConstructorOnlyAcceptsALaminasCacheStorageInterface()
     {
         if (PHP_MAJOR_VERSION >= 7) {
             $this->setExpectedException('\TypeError');
         }
 
-        new ZendCacheAdapter(new \DateTime());
+        new LaminasCacheAdapter(new \DateTime());
     }
 
-    public function testHasMethodCallsZendCacheHasItem()
+    public function testHasMethodCallsLaminasCacheHasItem()
     {
-        $mockZendCache = $this->getMockBuilder(Memory::class)
+        $mockLaminasCache = $this->getMockBuilder(Memory::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mockZendCache->expects($this->once())
+        $mockLaminasCache->expects($this->once())
             ->method('hasItem');
 
-        $adapter = new ZendCacheAdapter($mockZendCache);
+        $adapter = new LaminasCacheAdapter($mockLaminasCache);
         $adapter->has('SomeKey');
     }
 
-    public function testGetMethodCallsZendCacheGetItem()
+    public function testGetMethodCallsLaminasCacheGetItem()
     {
-        $mockZendCache = $this->getMockBuilder(Memory::class)
+        $mockLaminasCache = $this->getMockBuilder(Memory::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mockZendCache->expects($this->once())
+        $mockLaminasCache->expects($this->once())
             ->method('getItem');
 
-        $adapter = new ZendCacheAdapter($mockZendCache);
+        $adapter = new LaminasCacheAdapter($mockLaminasCache);
         $adapter->get('SomeKey');
     }
 
-    public function testSetMethodCallsZendCacheSetItem()
+    public function testSetMethodCallsLaminasCacheSetItem()
     {
-        $mockZendCache = $this->getMockBuilder(Memory::class)
+        $mockLaminasCache = $this->getMockBuilder(Memory::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mockZendCache->expects($this->once())
+        $mockLaminasCache->expects($this->once())
             ->method('setItem');
 
-        $adapter = new ZendCacheAdapter($mockZendCache);
+        $adapter = new LaminasCacheAdapter($mockLaminasCache);
         $adapter->set('SomeKey', array());
     }
 
-    public function testRemoveMethodCallsZendCacheRemoveItem()
+    public function testRemoveMethodCallsLaminasCacheRemoveItem()
     {
-        $mockZendCache = $this->getMockBuilder(Memory::class)
+        $mockLaminasCache = $this->getMockBuilder(Memory::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mockZendCache->expects($this->once())
+        $mockLaminasCache->expects($this->once())
             ->method('removeItem');
 
-        $adapter = new ZendCacheAdapter($mockZendCache);
+        $adapter = new LaminasCacheAdapter($mockLaminasCache);
         $adapter->remove('SomeKey');
     }
 }

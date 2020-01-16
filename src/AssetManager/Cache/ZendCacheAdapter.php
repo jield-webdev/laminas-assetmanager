@@ -3,25 +3,25 @@
 namespace AssetManager\Cache;
 
 use Assetic\Cache\CacheInterface;
-use Zend\Cache\Storage\StorageInterface;
+use Laminas\Cache\Storage\StorageInterface;
 
 /**
- * Zend Cache Storage Adapter for Assetic
+ * Laminas Cache Storage Adapter for Assetic
  */
-class ZendCacheAdapter implements CacheInterface
+class LaminasCacheAdapter implements CacheInterface
 {
 
     /** @var StorageInterface */
-    protected $zendCache;
+    protected $laminasCache;
 
     /**
      * Constructor
      *
-     * @param StorageInterface $zendCache Zend Configured Cache Storage
+     * @param StorageInterface $laminasCache Laminas Configured Cache Storage
      */
-    public function __construct(StorageInterface $zendCache)
+    public function __construct(StorageInterface $laminasCache)
     {
-        $this->zendCache = $zendCache;
+        $this->laminasCache = $laminasCache;
     }
 
     /**
@@ -29,7 +29,7 @@ class ZendCacheAdapter implements CacheInterface
      */
     public function has($key)
     {
-        return $this->zendCache->hasItem($key);
+        return $this->laminasCache->hasItem($key);
     }
 
     /**
@@ -37,7 +37,7 @@ class ZendCacheAdapter implements CacheInterface
      */
     public function get($key)
     {
-        return $this->zendCache->getItem($key);
+        return $this->laminasCache->getItem($key);
     }
 
     /**
@@ -45,7 +45,7 @@ class ZendCacheAdapter implements CacheInterface
      */
     public function set($key, $value)
     {
-        return $this->zendCache->setItem($key, $value);
+        return $this->laminasCache->setItem($key, $value);
     }
 
     /**
@@ -53,6 +53,6 @@ class ZendCacheAdapter implements CacheInterface
      */
     public function remove($key)
     {
-        return $this->zendCache->removeItem($key);
+        return $this->laminasCache->removeItem($key);
     }
 }
