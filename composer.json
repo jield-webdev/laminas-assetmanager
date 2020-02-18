@@ -24,7 +24,7 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/greatislander/assetic"
+      "url": "https://github.com/jield-webdev/assetic"
     }
   ],
   "require": {
@@ -36,7 +36,7 @@
     "laminas/laminas-loader": "^2.5.1",
     "laminas/laminas-eventmanager": "^2.6.3 || ^3.0.1",
     "laminas/laminas-mvc": "^2.7.9 || ^3.0.2",
-    "kriswallsmith/assetic": "dev-update-scss-php"
+    "kriswallsmith/assetic": "dev-jield-update-symfony"
   },
   "require-dev": {
     "laminas/laminas-http": "^2.5.4",
