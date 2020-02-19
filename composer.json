@@ -21,12 +21,6 @@
       "homepage": "http://ocramius.github.com/"
     }
   ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/jield-webdev/assetic"
-    }
-  ],
   "require": {
     "php": "^7.2",
     "scssphp/scssphp": "~1.0",
@@ -36,7 +30,7 @@
     "laminas/laminas-loader": "^2.5.1",
     "laminas/laminas-eventmanager": "^2.6.3 || ^3.0.1",
     "laminas/laminas-mvc": "^2.7.9 || ^3.0.2",
-    "kriswallsmith/assetic": "dev-jield-update-symfony"
+    "assetic/framework": "dev-2.0/dev"
   },
   "require-dev": {
     "laminas/laminas-http": "^2.5.4",
