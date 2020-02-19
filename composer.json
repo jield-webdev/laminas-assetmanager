@@ -1,6 +1,6 @@
 {
   "name": "rwoverdijk/assetmanager",
-  "description": "An assetmanager module for Laminas Framework 2.",
+  "description": "An assetmanager module for Laminas",
   "license": "BSD-2-Clause",
   "type": "library",
   "keywords": [
