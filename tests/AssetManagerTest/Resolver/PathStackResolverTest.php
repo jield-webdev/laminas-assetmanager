@@ -9,20 +9,20 @@ use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\PathStackResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PathStackResolverTest extends PHPUnit_Framework_TestCase
+class PathStackResolverTest extends TestCase
 {
     public function testConstructor()
     {
         $resolver = new PathStackResolver();
         $this->assertEmpty($resolver->getPaths()->toArray());
 
-        $resolver->addPaths(array(__DIR__));
-        $this->assertEquals(array(__DIR__ . DIRECTORY_SEPARATOR), $resolver->getPaths()->toArray());
+        $resolver->addPaths([__DIR__]);
+        $this->assertEquals([__DIR__ . DIRECTORY_SEPARATOR], $resolver->getPaths()->toArray());
 
         $resolver->clearPaths();
-        $this->assertEquals(array(), $resolver->getPaths()->toArray());
+        $this->assertEquals([], $resolver->getPaths()->toArray());
 
         $this->assertTrue($resolver instanceof MimeResolverAwareInterface);
         $this->assertTrue($resolver instanceof ResolverInterface);
@@ -33,53 +33,28 @@ class PathStackResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($mimeResolver, $resolver->getMimeResolver());
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
-    public function testSetMimeResolverFailObject()
-    {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
-
-        $resolver = new PathStackResolver();
-        $resolver->setMimeResolver(new \stdClass());
-    }
-
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
-    public function testSetMimeResolverFailString()
-    {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
-
-        $resolver = new PathStackResolver();
-        $resolver->setMimeResolver('invalid');
-    }
 
     public function testSetPaths()
     {
         $resolver = new PathStackResolver();
-        $resolver->setPaths(array('dir2', 'dir1'));
+        $resolver->setPaths(['dir2', 'dir1']);
         // order inverted because of how a stack is traversed
         $this->assertSame(
-            array('dir1' . DIRECTORY_SEPARATOR, 'dir2' . DIRECTORY_SEPARATOR),
+            ['dir1' . DIRECTORY_SEPARATOR, 'dir2' . DIRECTORY_SEPARATOR],
             $resolver->getPaths()->toArray()
         );
 
-        $paths = new ArrayObject(array(
+        $paths = new ArrayObject([
             'dir4',
             'dir3',
-        ));
+        ]);
         $resolver->setPaths($paths);
         $this->assertSame(
-            array('dir3' . DIRECTORY_SEPARATOR, 'dir4' . DIRECTORY_SEPARATOR),
+            ['dir3' . DIRECTORY_SEPARATOR, 'dir4' . DIRECTORY_SEPARATOR],
             $resolver->getPaths()->toArray()
         );
 
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->setPaths('invalid');
 
     }
@@ -94,7 +69,7 @@ class PathStackResolverTest extends PHPUnit_Framework_TestCase
 
         $resolver->addPath(__DIR__);
 
-        $fileAsset = new Asset\FileAsset(__FILE__);
+        $fileAsset           = new Asset\FileAsset(__FILE__);
         $fileAsset->mimetype = $mimeResolver->getMimeType(__FILE__);
 
         $this->assertEquals($fileAsset, $resolver->resolve(basename(__FILE__)));
@@ -112,7 +87,7 @@ class PathStackResolverTest extends PHPUnit_Framework_TestCase
     public function testLfiProtection()
     {
         $mimeResolver = new MimeResolver;
-        $resolver = new PathStackResolver;
+        $resolver     = new PathStackResolver;
         $resolver->setMimeResolver($mimeResolver);
 
         // should be on by default
@@ -136,7 +111,7 @@ class PathStackResolverTest extends PHPUnit_Framework_TestCase
     public function testWillRefuseInvalidPath()
     {
         $resolver = new PathStackResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(null);
     }
 

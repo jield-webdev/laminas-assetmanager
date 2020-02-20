@@ -2,7 +2,7 @@
 
 namespace AssetManager\Cache;
 
-use Assetic\Cache\CacheInterface;
+use Assetic\Contracts\Cache\CacheInterface;
 use AssetManager\Exception\RuntimeException;
 use Laminas\Stdlib\ErrorHandler;
 
@@ -30,8 +30,8 @@ class FilePathCache implements CacheInterface
     /**
      * Constructor
      *
-     * @param string $dir       The directory to cache in
-     * @param string $filename  The filename we'll be caching for.
+     * @param string $dir The directory to cache in
+     * @param string $filename The filename we'll be caching for.
      */
     public function __construct($dir, $filename)
     {
@@ -45,6 +45,19 @@ class FilePathCache implements CacheInterface
     public function has($key)
     {
         return file_exists($this->cachedFile());
+    }
+
+    /**
+     * Get the path-to-file.
+     * @return string Cache path
+     */
+    protected function cachedFile()
+    {
+        if (null === $this->cachedFile) {
+            $this->cachedFile = rtrim($this->dir, '/') . '/' . ltrim($this->filename, '/');
+        }
+
+        return $this->cachedFile;
     }
 
     /**
@@ -74,7 +87,9 @@ class FilePathCache implements CacheInterface
 
         if (!is_dir($cacheDir)) {
             $umask = umask(0);
-            mkdir($cacheDir, 0777, true);
+            if (!mkdir($cacheDir, 0777, true) && !is_dir($cacheDir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $cacheDir));
+            }
             umask($umask);
 
             // @codeCoverageIgnoreStart
@@ -113,18 +128,5 @@ class FilePathCache implements CacheInterface
         }
 
         return $success;
-    }
-
-    /**
-     * Get the path-to-file.
-     * @return string Cache path
-     */
-    protected function cachedFile()
-    {
-        if (null === $this->cachedFile) {
-            $this->cachedFile = rtrim($this->dir, '/') . '/' . ltrim($this->filename, '/');
-        }
-
-        return $this->cachedFile;
     }
 }

@@ -3,16 +3,16 @@
 namespace AssetManagerTest\Config;
 
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\Config;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test to ensure config file is properly setup and all services are retrievable
  *
  * @package AssetManagerTest\Config
  */
-class ModuleServiceManagerConfigTest extends PHPUnit_Framework_TestCase
+class ModuleServiceManagerConfigTest extends TestCase
 {
     /**
      * Test the Service Managers Factories.
@@ -21,10 +21,10 @@ class ModuleServiceManagerConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testServiceManagerFactories()
     {
-        $config = include __DIR__.'/../../../config/module.config.php';
+        $config = include __DIR__ . '/../../../config/module.config.php';
 
         $serviceManagerConfig = new Config($config['service_manager']);
-        $serviceManager = new ServiceManager();
+        $serviceManager       = new ServiceManager();
         $serviceManagerConfig->configureServiceManager($serviceManager);
         $serviceManager->setService('config', $config);
 
@@ -46,10 +46,10 @@ class ModuleServiceManagerConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testServiceManagerInvokables()
     {
-        $config = include __DIR__.'/../../../config/module.config.php';
+        $config = include __DIR__ . '/../../../config/module.config.php';
 
         $serviceManagerConfig = new Config($config['service_manager']);
-        $serviceManager = new ServiceManager();
+        $serviceManager       = new ServiceManager();
         $serviceManagerConfig->configureServiceManager($serviceManager);
         $serviceManager->setService('config', $config);
 
@@ -70,10 +70,10 @@ class ModuleServiceManagerConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testServiceManagerAliases()
     {
-        $config = include __DIR__.'/../../../config/module.config.php';
+        $config = include __DIR__ . '/../../../config/module.config.php';
 
         $serviceManagerConfig = new Config($config['service_manager']);
-        $serviceManager = new ServiceManager();
+        $serviceManager       = new ServiceManager();
         $serviceManagerConfig->configureServiceManager($serviceManager);
         $serviceManager->setService('config', $config);
 
@@ -94,10 +94,10 @@ class ModuleServiceManagerConfigTest extends PHPUnit_Framework_TestCase
      */
     public function mimeResolverInvokableTest()
     {
-        $config = include __DIR__.'/../../../config/module.config.php';
+        $config = include __DIR__ . '/../../../config/module.config.php';
 
         $serviceManagerConfig = new Config($config['service_manager']);
-        $serviceManager = new ServiceManager();
+        $serviceManager       = new ServiceManager();
         $serviceManagerConfig->configureServiceManager($serviceManager);
         $serviceManager->setService('config', $config);
 
@@ -112,10 +112,10 @@ class ModuleServiceManagerConfigTest extends PHPUnit_Framework_TestCase
      */
     public function mimeResolverAliasTest()
     {
-        $config = include __DIR__.'/../../../config/module.config.php';
+        $config = include __DIR__ . '/../../../config/module.config.php';
 
         $serviceManagerConfig = new Config($config['service_manager']);
-        $serviceManager = new ServiceManager();
+        $serviceManager       = new ServiceManager();
         $serviceManagerConfig->configureServiceManager($serviceManager);
         $serviceManager->setService('config', $config);
 

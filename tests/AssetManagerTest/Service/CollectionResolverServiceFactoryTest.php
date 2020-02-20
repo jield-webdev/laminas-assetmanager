@@ -4,10 +4,10 @@ namespace AssetManagerTest\Service;
 
 use AssetManager\Resolver\CollectionResolver;
 use AssetManager\Service\CollectionResolverServiceFactory;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class CollectionResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
+class CollectionResolverServiceFactoryTest extends TestCase
 {
     /**
      * Mainly to avoid regressions
@@ -17,26 +17,26 @@ class CollectionResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolver_configs' => array(
-                        'collections' => array(
+            [
+                'asset_manager' => [
+                    'resolver_configs' => [
+                        'collections' => [
                             'key1' => 'value1',
                             'key2' => 'value2',
-                        ),
-                    ),
-                ),
-            )
+                        ],
+                    ],
+                ],
+            ]
         );
 
         $factory = new CollectionResolverServiceFactory();
         /* @var CollectionResolver */
         $collectionsResolver = $factory->createService($serviceManager);
         $this->assertSame(
-            array(
+            [
                 'key1' => 'value1',
                 'key2' => 'value2',
-            ),
+            ],
             $collectionsResolver->getCollections()
         );
     }
@@ -47,7 +47,7 @@ class CollectionResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateServiceWithNoConfig()
     {
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('config', array());
+        $serviceManager->setService('config', []);
 
         $factory = new CollectionResolverServiceFactory();
         /* @var CollectionResolver */

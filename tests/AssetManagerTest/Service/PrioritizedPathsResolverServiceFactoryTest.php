@@ -4,10 +4,10 @@ namespace AssetManagerTest\Service;
 
 use AssetManager\Resolver\PrioritizedPathsResolver;
 use AssetManager\Service\PrioritizedPathsResolverServiceFactory;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class PrioritizedPathsResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
+class PrioritizedPathsResolverServiceFactoryTest extends TestCase
 {
     /**
      * Mainly to avoid regressions
@@ -17,40 +17,40 @@ class PrioritizedPathsResolverServiceFactoryTest extends PHPUnit_Framework_TestC
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolver_configs' => array(
-                        'prioritized_paths' => array(
-                            array(
-                                'path' => 'dir3',
+            [
+                'asset_manager' => [
+                    'resolver_configs' => [
+                        'prioritized_paths' => [
+                            [
+                                'path'     => 'dir3',
                                 'priority' => 750,
-                            ),
-                            array(
-                                'path' => 'dir2',
+                            ],
+                            [
+                                'path'     => 'dir2',
                                 'priority' => 1000,
-                            ),
-                            array(
-                                'path' => 'dir1',
+                            ],
+                            [
+                                'path'     => 'dir1',
                                 'priority' => 500,
-                            ),
-                        ),
-                    ),
-                ),
-            )
+                            ],
+                        ],
+                    ],
+                ],
+            ]
         );
 
         $factory = new PrioritizedPathsResolverServiceFactory();
         /* @var $resolver PrioritizedPathsResolver */
         $resolver = $factory->createService($serviceManager);
 
-        $fetched = array();
+        $fetched = [];
 
         foreach ($resolver->getPaths() as $path) {
             $fetched[] = $path;
         }
 
         $this->assertSame(
-            array('dir2' . DIRECTORY_SEPARATOR, 'dir3' . DIRECTORY_SEPARATOR, 'dir1' . DIRECTORY_SEPARATOR),
+            ['dir2' . DIRECTORY_SEPARATOR, 'dir3' . DIRECTORY_SEPARATOR, 'dir1' . DIRECTORY_SEPARATOR],
             $fetched
         );
     }
@@ -61,7 +61,7 @@ class PrioritizedPathsResolverServiceFactoryTest extends PHPUnit_Framework_TestC
     public function testCreateServiceWithNoConfig()
     {
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('config', array());
+        $serviceManager->setService('config', []);
 
         $factory = new PrioritizedPathsResolverServiceFactory();
         /* @var $resolver PrioritizedPathsResolver */

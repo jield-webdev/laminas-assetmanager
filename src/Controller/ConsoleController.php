@@ -18,12 +18,12 @@ class ConsoleController extends AbstractActionController
 {
 
     /**
-     * @var \Laminas\Console\Adapter\AdapterInterface console object
+     * @var Console console object
      */
     protected $console;
 
     /**
-     * @var \AssetManager\Service\AssetManager asset manager object
+     * @var AssetManager asset manager object
      */
     protected $assetManager;
 
@@ -65,9 +65,9 @@ class ConsoleController extends AbstractActionController
      */
     public function warmupAction()
     {
-        $request    = $this->getRequest();
-        $purge      = $request->getParam('purge', false);
-        $verbose    = $request->getParam('verbose', false) || $request->getParam('v', false);
+        $request = $this->getRequest();
+        $purge   = $request->getParam('purge', false);
+        $verbose = $request->getParam('verbose', false) || $request->getParam('v', false);
 
         // purge cache for every configuration
         if ($purge) {
@@ -78,14 +78,14 @@ class ConsoleController extends AbstractActionController
 
         $collection = $this->assetManager->getResolver()->collect();
         $this->output(sprintf('Collected %d assets, warming up...', count($collection)), $verbose);
-
         foreach ($collection as $path) {
             $asset = $this->assetManager->getResolver()->resolve($path);
+
             $this->assetManager->getAssetFilterManager()->setFilters($path, $asset);
             $this->assetManager->getAssetCacheManager()->setCache($path, $asset)->dump();
         }
 
-        $this->output(sprintf('Warming up finished...', $verbose));
+        $this->output('Warming up finished...', $verbose);
     }
 
     /**
@@ -110,13 +110,25 @@ class ConsoleController extends AbstractActionController
             $node = $config['options']['dir'];
 
             if ($configName !== 'default') {
-                $node .= '/'.$configName;
+                $node .= '/' . $configName;
             }
 
             $this->recursiveRemove($node, $verbose);
         }
 
         return true;
+    }
+
+    /**
+     * Outputs given $line if $verbose i truthy value.
+     * @param $line
+     * @param bool $verbose verbose flag, default true
+     */
+    protected function output($line, $verbose = true)
+    {
+        if ($verbose) {
+            $this->console->writeLine($line);
+        }
     }
 
     /**
@@ -136,20 +148,8 @@ class ConsoleController extends AbstractActionController
                 $this->recursiveRemove($node . '/' . $object);
             }
         } elseif (is_file($node)) {
-            $this->output(sprintf("unlinking %s...", $node), $verbose);
+            $this->output(sprintf('unlinking %s...', $node), $verbose);
             unlink($node);
-        }
-    }
-
-    /**
-     * Outputs given $line if $verbose i truthy value.
-     * @param $line
-     * @param bool $verbose verbose flag, default true
-     */
-    protected function output($line, $verbose = true)
-    {
-        if ($verbose) {
-            $this->console->writeLine($line);
         }
     }
 }

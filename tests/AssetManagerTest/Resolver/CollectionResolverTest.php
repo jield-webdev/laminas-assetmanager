@@ -1,18 +1,18 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use Assetic\Asset;
 use Assetic\Asset\AssetCache;
-use Assetic\Cache\CacheInterface;
+use Assetic\Contracts\Cache\CacheInterface;
 use AssetManager\Resolver\AggregateResolverAwareInterface;
 use AssetManager\Resolver\CollectionResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CollectionsResolverTest extends PHPUnit_Framework_TestCase
+class CollectionsResolverTest extends TestCase
 {
     public function getResolverMock()
     {
@@ -28,35 +28,35 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
         // Check if valid instance
         $this->assertTrue($resolver instanceof ResolverInterface);
         $this->assertTrue($resolver instanceof AggregateResolverAwareInterface);
 
         // Check if set to empty (null argument)
-        $this->assertSame(array(), $resolver->getCollections());
+        $this->assertSame([], $resolver->getCollections());
 
-        $resolver = new CollectionResolver(array(
-            'key1' => array('value1'),
-            'key2' => array('value2'),
-        ));
+        $resolver = new CollectionResolver([
+            'key1' => ['value1'],
+            'key2' => ['value2'],
+        ]);
         $this->assertSame(
-            array(
-                'key1' => array('value1'),
-                'key2' => array('value2'),
-            ),
+            [
+                'key1' => ['value1'],
+                'key2' => ['value2'],
+            ],
             $resolver->getCollections()
         );
     }
 
     public function testSetCollections()
     {
-        $resolver = new CollectionResolver;
-        $collArr  = array(
-            'key1' => array('value1'),
-            'key2' => array('value2'),
-        );
+        $resolver = new CollectionResolver();
+        $collArr  = [
+            'key1' => ['value1'],
+            'key2' => ['value2'],
+        ];
 
         $resolver->setCollections($collArr);
 
@@ -66,10 +66,10 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         );
 
         // overwrite
-        $collArr = array(
-            'key3' => array('value3'),
-            'key4' => array('value4'),
-        );
+        $collArr = [
+            'key3' => ['value3'],
+            'key4' => ['value4'],
+        ];
 
         $resolver->setCollections($collArr);
 
@@ -80,28 +80,28 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
 
         // Overwrite with traversable
-        $resolver->setCollections(new CollectionsIterable);
+        $resolver->setCollections(new CollectionsIterable());
 
-        $collArr = array(
-            'collectionName1' => array(
+        $collArr = [
+            'collectionName1' => [
                 'collection 1.1',
                 'collection 1.2',
                 'collection 1.3',
                 'collection 1.4',
-            ),
-            'collectionName2' => array(
+            ],
+            'collectionName2' => [
                 'collection 2.1',
                 'collection 2.2',
                 'collection 2.3',
                 'collection 2.4',
-            ),
-            'collectionName3' => array(
+            ],
+            'collectionName3' => [
                 'collection 3.1',
                 'collection 3.2',
                 'collection 3.3',
                 'collection 3.4',
-            )
-        );
+            ]
+        ];
 
         $this->assertEquals($collArr, $resolver->getCollections());
     }
@@ -111,9 +111,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testSetCollectionFailsObject()
     {
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
-        $resolver->setCollections(new \stdClass);
+        $resolver->setCollections(new \stdClass());
     }
 
     /**
@@ -121,14 +121,14 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testSetCollectionFailsString()
     {
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
         $resolver->setCollections('invalid');
     }
 
     public function testSetGetAggregateResolver()
     {
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
         $aggregateResolver = $this->getMock(ResolverInterface::class);
         $aggregateResolver
@@ -142,18 +142,13 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('world', $resolver->getAggregateResolver()->resolve('say'));
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testSetAggregateResolverFails()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException('\TypeError');
 
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
-        $resolver->setAggregateResolver(new \stdClass);
+        $resolver->setAggregateResolver(new \stdClass());
     }
 
     /**
@@ -161,7 +156,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testResolveNoArgsEqualsNull()
     {
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
         $this->assertNull($resolver->resolve('bacon'));
     }
@@ -171,7 +166,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testResolveNonArrayCollectionException()
     {
-        $resolver = new CollectionResolver(array('bacon'=>'bueno'));
+        $resolver = new CollectionResolver(['bacon' => 'bueno']);
 
         $resolver->resolve('bacon');
     }
@@ -181,9 +176,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testCollectionItemNonString()
     {
-        $resolver = new CollectionResolver(array(
-            'bacon' => array(new \stdClass())
-        ));
+        $resolver = new CollectionResolver([
+            'bacon' => [new \stdClass()]
+        ]);
 
         $resolver->resolve('bacon');
 
@@ -201,9 +196,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             ->with('bacon')
             ->will($this->returnValue(null));
 
-        $resolver = new CollectionResolver(array(
-            'myCollection' => array('bacon')
-        ));
+        $resolver = new CollectionResolver([
+            'myCollection' => ['bacon']
+        ]);
 
         $resolver->setAggregateResolver($aggregateResolver);
 
@@ -222,9 +217,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             ->with('bacon')
             ->will($this->returnValue('invalid'));
 
-        $resolver = new CollectionResolver(array(
-            'myCollection' => array('bacon')
-        ));
+        $resolver = new CollectionResolver([
+            'myCollection' => ['bacon']
+        ]);
 
         $resolver->setAggregateResolver($aggregateResolver);
 
@@ -237,7 +232,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
     public function testMimeTypesDontMatch()
     {
         $callbackInvocationCount = 0;
-        $callback = function () use (&$callbackInvocationCount) {
+        $callback                = function () use (&$callbackInvocationCount) {
 
             $asset1 = new Asset\StringAsset('bacon');
             $asset2 = new Asset\StringAsset('eggs');
@@ -248,7 +243,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             $asset3->mimetype = 'text/javascript';
 
             $callbackInvocationCount += 1;
-            $assetName = "asset$callbackInvocationCount";
+            $assetName               = "asset$callbackInvocationCount";
             return $$assetName;
         };
 
@@ -264,13 +259,13 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             ->method('setFilters')
             ->will($this->returnValue(null));
 
-        $resolver = new CollectionResolver(array(
-            'myCollection' => array(
+        $resolver = new CollectionResolver([
+            'myCollection' => [
                 'bacon',
                 'eggs',
                 'mud',
-            )
-        ));
+            ]
+        ]);
 
         $resolver->setAggregateResolver($aggregateResolver);
         $resolver->setAssetFilterManager($assetFilterManager);
@@ -283,35 +278,35 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $aggregateResolver = $this->getMock(ResolverInterface::class);
 
         //assets with same 'last modifled time'.
-        $now = time();
-        $bacon =  new Asset\StringAsset('bacon');
+        $now   = time();
+        $bacon = new Asset\StringAsset('bacon');
         $bacon->setLastModified($now);
         $bacon->mimetype = 'text/plain';
 
-        $eggs =  new Asset\StringAsset('eggs');
+        $eggs = new Asset\StringAsset('eggs');
         $eggs->setLastModified($now);
         $eggs->mimetype = 'text/plain';
 
-        $assets = array(
-            array('bacon', $bacon),
-            array('eggs', $eggs),
-        );
+        $assets = [
+            ['bacon', $bacon],
+            ['eggs', $eggs],
+        ];
 
         $aggregateResolver
             ->expects($this->any())
             ->method('resolve')
             ->will($this->returnValueMap($assets));
 
-        $resolver = new CollectionResolver(array(
-            'collection1' => array(
+        $resolver = new CollectionResolver([
+            'collection1' => [
                 'bacon',
-            ),
-            'collection2' => array(
+            ],
+            'collection2' => [
                 'eggs',
-            ),
-        ));
+            ],
+        ]);
 
-        $mimeResolver = new MimeResolver;
+        $mimeResolver       = new MimeResolver();
         $assetFilterManager = new AssetFilterManager();
         $assetFilterManager->setMimeResolver($mimeResolver);
 
@@ -324,7 +319,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $cacheInterface = $this->getMock(CacheInterface::class);
 
         $cacheKeys = new \ArrayObject();
-        $callback = function ($key) use ($cacheKeys) {
+        $callback  = function ($key) use ($cacheKeys) {
             $cacheKeys[] = $key;
             return true;
         };
@@ -352,7 +347,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
     public function testSuccessResolve()
     {
         $callbackInvocationCount = 0;
-        $callback = function () use (&$callbackInvocationCount) {
+        $callback                = function () use (&$callbackInvocationCount) {
 
             $asset1 = new Asset\StringAsset('bacon');
             $asset2 = new Asset\StringAsset('eggs');
@@ -363,7 +358,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             $asset3->mimetype = 'text/plain';
 
             $callbackInvocationCount += 1;
-            $assetName = "asset$callbackInvocationCount";
+            $assetName               = "asset$callbackInvocationCount";
             return $$assetName;
         };
 
@@ -373,16 +368,16 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             ->method('resolve')
             ->will($this->returnCallback($callback));
 
-        $resolver = new CollectionResolver(array(
-            'myCollection' => array(
+        $resolver = new CollectionResolver([
+            'myCollection' => [
                 'bacon',
                 'eggs',
                 'mud',
-            )
-        ));
+            ]
+        ]);
 
 
-        $mimeResolver = new MimeResolver;
+        $mimeResolver       = new MimeResolver();
         $assetFilterManager = new AssetFilterManager();
 
         $assetFilterManager->setMimeResolver($mimeResolver);
@@ -403,19 +398,19 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testCollect()
     {
-        $collections = array(
-            'myCollection' => array(
+        $collections = [
+            'myCollection'   => [
                 'bacon',
                 'eggs',
                 'mud',
-            ),
-            'my/collect.ion' => array(
+            ],
+            'my/collect.ion' => [
                 'bacon',
                 'eggs',
                 'mud',
-            ),
-        );
-        $resolver = new CollectionResolver($collections);
+            ],
+        ];
+        $resolver    = new CollectionResolver($collections);
 
         $this->assertEquals(array_keys($collections), $resolver->collect());
     }

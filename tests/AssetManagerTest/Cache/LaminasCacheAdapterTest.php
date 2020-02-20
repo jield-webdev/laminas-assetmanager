@@ -4,13 +4,14 @@ namespace AssetManagerTest\Cache;
 
 use AssetManager\Cache\LaminasCacheAdapter;
 use Laminas\Cache\Storage\Adapter\Memory;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test file for Laminas Cache Adapter
  *
  * @package AssetManager\Cache
  */
-class LaminasCacheAdapterTest extends \PHPUnit_Framework_TestCase
+class LaminasCacheAdapterTest extends TestCase
 {
     public function testConstructor()
     {
@@ -21,18 +22,6 @@ class LaminasCacheAdapterTest extends \PHPUnit_Framework_TestCase
         $adapter = new LaminasCacheAdapter($mockLaminasCache);
 
         $this->assertInstanceOf(LaminasCacheAdapter::class, $adapter);
-    }
-
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
-    public function testConstructorOnlyAcceptsALaminasCacheStorageInterface()
-    {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
-
-        new LaminasCacheAdapter(new \DateTime());
     }
 
     public function testHasMethodCallsLaminasCacheHasItem()
@@ -71,7 +60,7 @@ class LaminasCacheAdapterTest extends \PHPUnit_Framework_TestCase
             ->method('setItem');
 
         $adapter = new LaminasCacheAdapter($mockLaminasCache);
-        $adapter->set('SomeKey', array());
+        $adapter->set('SomeKey', []);
     }
 
     public function testRemoveMethodCallsLaminasCacheRemoveItem()

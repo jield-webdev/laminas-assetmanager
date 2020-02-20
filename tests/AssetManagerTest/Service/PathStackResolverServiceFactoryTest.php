@@ -4,10 +4,10 @@ namespace AssetManagerTest\Service;
 
 use AssetManager\Resolver\PathStackResolver;
 use AssetManager\Service\PathStackResolverServiceFactory;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class PathStackResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
+class PathStackResolverServiceFactoryTest extends TestCase
 {
     /**
      * Mainly to avoid regressions
@@ -17,26 +17,26 @@ class PathStackResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolver_configs' => array(
-                        'paths' => array(
+            [
+                'asset_manager' => [
+                    'resolver_configs' => [
+                        'paths' => [
                             'path1/',
                             'path2/',
-                        ),
-                    ),
-                ),
-            )
+                        ],
+                    ],
+                ],
+            ]
         );
 
         $factory = new PathStackResolverServiceFactory();
         /* @var $resolver PathStackResolver */
         $resolver = $factory->createService($serviceManager);
         $this->assertSame(
-            array(
+            [
                 'path2/',
                 'path1/',
-            ),
+            ],
             $resolver->getPaths()->toArray()
         );
     }
@@ -47,7 +47,7 @@ class PathStackResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateServiceWithNoConfig()
     {
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('config', array());
+        $serviceManager->setService('config', []);
 
         $factory = new PathStackResolverServiceFactory();
         /* @var $resolver PathStackResolver */

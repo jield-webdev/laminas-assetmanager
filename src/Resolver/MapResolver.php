@@ -6,8 +6,8 @@ use Assetic\Asset\FileAsset;
 use Assetic\Asset\HttpAsset;
 use AssetManager\Exception;
 use AssetManager\Service\MimeResolver;
-use Traversable;
 use Laminas\Stdlib\ArrayUtils;
+use Traversable;
 
 /**
  * This resolver allows you to resolve using a 1 on 1 mapping to a file.
@@ -17,7 +17,7 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * @var array
      */
-    protected $map = array();
+    protected $map = [];
 
     /**
      * @var MimeResolver The mime resolver.
@@ -31,29 +31,19 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @param array|Traversable $map
      */
-    public function __construct($map = array())
+    public function __construct($map = [])
     {
         $this->setMap($map);
     }
 
     /**
-     * Set the mime resolver
+     * Retrieve the map
      *
-     * @param MimeResolver $resolver
+     * @return array
      */
-    public function setMimeResolver(MimeResolver $resolver)
+    public function getMap()
     {
-        $this->mimeResolver = $resolver;
-    }
-
-    /**
-     * Get the mime resolver
-     *
-     * @return MimeResolver
-     */
-    public function getMimeResolver()
-    {
-        return $this->mimeResolver;
+        return $this->map;
     }
 
     /**
@@ -61,7 +51,7 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * Maps should be arrays or Traversable objects with name => path pairs
      *
-     * @param  array|Traversable                  $map
+     * @param array|Traversable $map
      * @throws Exception\InvalidArgumentException
      */
     public function setMap($map)
@@ -82,16 +72,6 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
     }
 
     /**
-     * Retrieve the map
-     *
-     * @return array
-     */
-    public function getMap()
-    {
-        return $this->map;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function resolve($name)
@@ -100,8 +80,8 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
             return null;
         }
 
-        $file            = $this->map[$name];
-        $mimeType        = $this->getMimeResolver()->getMimeType($file);
+        $file     = $this->map[$name];
+        $mimeType = $this->getMimeResolver()->getMimeType($file);
 
         if (false === filter_var($file, FILTER_VALIDATE_URL)) {
             $asset = new FileAsset($file);
@@ -112,6 +92,26 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
         $asset->mimetype = $mimeType;
 
         return $asset;
+    }
+
+    /**
+     * Get the mime resolver
+     *
+     * @return MimeResolver
+     */
+    public function getMimeResolver()
+    {
+        return $this->mimeResolver;
+    }
+
+    /**
+     * Set the mime resolver
+     *
+     * @param MimeResolver $resolver
+     */
+    public function setMimeResolver(MimeResolver $resolver)
+    {
+        $this->mimeResolver = $resolver;
     }
 
     /**

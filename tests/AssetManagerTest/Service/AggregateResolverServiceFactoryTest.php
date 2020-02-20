@@ -6,15 +6,15 @@ use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AggregateResolverServiceFactory;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
+class AggregateResolverServiceFactoryTest extends TestCase
 {
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/InterfaceTestResolver.php';
     }
@@ -22,10 +22,10 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
     public function testWillInstantiateEmptyResolver()
     {
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('config', array());
+        $serviceManager->setService('config', []);
         $serviceManager->setService(MimeResolver::class, new MimeResolver);
 
-        $factory = new AggregateResolverServiceFactory();
+        $factory  = new AggregateResolverServiceFactory();
         $resolver = $factory->createService($serviceManager);
         $this->assertInstanceOf(ResolverInterface::class, $resolver);
         $this->assertNull($resolver->resolve('/some-path'));
@@ -36,13 +36,13 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolvers' => array(
+            [
+                'asset_manager' => [
+                    'resolvers' => [
                         'mocked_resolver' => 1234,
-                    ),
-                ),
-            )
+                    ],
+                ],
+            ]
         );
 
         $mockedResolver = $this->getMock(ResolverInterface::class);
@@ -54,7 +54,7 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager->setService('mocked_resolver', $mockedResolver);
         $serviceManager->setService(MimeResolver::class, new MimeResolver);
 
-        $factory = new AggregateResolverServiceFactory();
+        $factory  = new AggregateResolverServiceFactory();
         $resolver = $factory->createService($serviceManager);
 
         $this->assertSame('test-resolved-path', $resolver->resolve('test-path'));
@@ -68,13 +68,13 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolvers' => array(
+            [
+                'asset_manager' => [
+                    'resolvers' => [
                         'My\Resolver' => 1234,
-                    ),
-                ),
-            )
+                    ],
+                ],
+            ]
         );
         $serviceManager->setService(
             'My\Resolver',
@@ -90,14 +90,14 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolvers' => array(
+            [
+                'asset_manager' => [
+                    'resolvers' => [
                         'mocked_resolver_1' => 1000,
                         'mocked_resolver_2' => 500,
-                    ),
-                ),
-            )
+                    ],
+                ],
+            ]
         );
 
         $mockedResolver1 = $this->getMock(ResolverInterface::class);
@@ -115,7 +115,7 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
             ->method('resolve');
         $serviceManager->setService('mocked_resolver_2', $mockedResolver2);
 
-        $factory = new AggregateResolverServiceFactory();
+        $factory  = new AggregateResolverServiceFactory();
         $resolver = $factory->createService($serviceManager);
 
         $this->assertSame('test-resolved-path', $resolver->resolve('test-path'));
@@ -126,14 +126,14 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolvers' => array(
+            [
+                'asset_manager' => [
+                    'resolvers' => [
                         'mocked_resolver_1' => 1000,
                         'mocked_resolver_2' => 500,
-                    ),
-                ),
-            )
+                    ],
+                ],
+            ]
         );
 
         $mockedResolver1 = $this->getMock(ResolverInterface::class);
@@ -153,7 +153,7 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue('test-resolved-path'));
         $serviceManager->setService('mocked_resolver_2', $mockedResolver2);
 
-        $factory = new AggregateResolverServiceFactory();
+        $factory  = new AggregateResolverServiceFactory();
         $resolver = $factory->createService($serviceManager);
 
         $this->assertSame('test-resolved-path', $resolver->resolve('test-path'));
@@ -164,13 +164,13 @@ class AggregateResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolvers' => array(
+            [
+                'asset_manager' => [
+                    'resolvers' => [
                         'mocked_resolver' => 1000,
-                    ),
-                ),
-            )
+                    ],
+                ],
+            ]
         );
 
         $interfaceTestResolver = new \InterfaceTestResolver;

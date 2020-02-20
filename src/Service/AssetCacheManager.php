@@ -3,8 +3,10 @@
 namespace AssetManager\Service;
 
 use Assetic\Asset\AssetCache;
-use Assetic\Asset\AssetInterface;
-use Assetic\Cache\CacheInterface;
+use Assetic\Cache\FilesystemCache;
+use Assetic\Contracts\Asset\AssetInterface;
+use Assetic\Contracts\Cache\CacheInterface;
+use AssetManager\Cache\FilePathCache;
 use Laminas\ServiceManager\ServiceLocatorInterface;
 
 /**
@@ -20,31 +22,30 @@ class AssetCacheManager
     /**
      * @var array Cache configuration.
      */
-    protected $config = array();
+    protected $config = [];
 
     /**
      * Construct the AssetCacheManager
      *
-     * @param   ServiceLocatorInterface $serviceLocator
-     * @param   array                   $config
-     *
-     * @return  AssetCacheManager
+     * @param ServiceLocatorInterface $serviceLocator
+     * @param array $config
      */
     public function __construct(
         ServiceLocatorInterface $serviceLocator,
         $config
-    ) {
+    )
+    {
         $this->serviceLocator = $serviceLocator;
-        $this->config = $config;
+        $this->config         = $config;
     }
 
     /**
      * Set the cache (if any) on the asset, and return the new AssetCache.
      *
-     * @param string         $path  Path to asset
+     * @param string $path Path to asset
      * @param AssetInterface $asset Assetic Asset Interface
      *
-     * @return  AssetCache
+     * @return  AssetCache|AssetInterface
      */
     public function setCache($path, AssetInterface $asset)
     {
@@ -54,8 +55,8 @@ class AssetCacheManager
             return $asset;
         }
 
-        $assetCache             = new AssetCache($asset, $provider);
-        $assetCache->mimetype   = $asset->mimetype;
+        $assetCache           = new AssetCache($asset, $provider);
+        $assetCache->mimetype = $asset->mimetype;
 
         return $assetCache;
     }
@@ -64,12 +65,8 @@ class AssetCacheManager
      * Get the cache provider.  First checks to see if the provider is callable,
      * then will attempt to get it from the service locator, finally will fallback
      * to a class mapper.
-     *
-     * @param $path
-     *
-     * @return array
      */
-    private function getProvider($path)
+    private function getProvider(string $path)
     {
         $cacheProvider = $this->getCacheProviderConfig($path);
 
@@ -88,7 +85,7 @@ class AssetCacheManager
             return call_user_func($cacheProvider['cache'], $path);
         }
 
-        $dir = '';
+        $dir   = '';
         $class = $cacheProvider['cache'];
 
         if (!empty($cacheProvider['options']['dir'])) {
@@ -107,7 +104,7 @@ class AssetCacheManager
      * @return null|array Cache config definition.  Returns null if not found in
      *                    config.
      */
-    private function getCacheProviderConfig($path)
+    private function getCacheProviderConfig($path): ?array
     {
         $cacheProvider = null;
 
@@ -132,20 +129,17 @@ class AssetCacheManager
      *
      * @return string
      */
-    private function classMapper($class)
+    private function classMapper($class): string
     {
         $classToCheck = $class;
         $classToCheck .= (substr($class, -5) === 'Cache') ? '' : 'Cache';
 
         switch ($classToCheck) {
-            case 'ApcCache':
-                $class = 'Assetic\Cache\ApcCache';
-                break;
             case 'FilesystemCache':
-                $class = 'Assetic\Cache\FilesystemCache';
+                $class = FilesystemCache::class;
                 break;
             case 'FilePathCache':
-                $class = 'AssetManager\Cache\FilePathCache';
+                $class = FilePathCache::class;
                 break;
         }
 

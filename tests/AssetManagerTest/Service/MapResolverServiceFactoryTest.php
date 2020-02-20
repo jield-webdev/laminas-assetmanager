@@ -4,10 +4,10 @@ namespace AssetManagerTest\Service;
 
 use AssetManager\Resolver\MapResolver;
 use AssetManager\Service\MapResolverServiceFactory;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class MapResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
+class MapResolverServiceFactoryTest extends TestCase
 {
     /**
      * Mainly to avoid regressions
@@ -17,26 +17,26 @@ class MapResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'resolver_configs' => array(
-                        'map' => array(
+            [
+                'asset_manager' => [
+                    'resolver_configs' => [
+                        'map' => [
                             'key1' => 'value1',
                             'key2' => 'value2',
-                        ),
-                    ),
-                ),
-            )
+                        ],
+                    ],
+                ],
+            ]
         );
 
         $factory = new MapResolverServiceFactory();
         /* @var MapResolver */
         $mapResolver = $factory->createService($serviceManager);
         $this->assertSame(
-            array(
+            [
                 'key1' => 'value1',
                 'key2' => 'value2',
-            ),
+            ],
             $mapResolver->getMap()
         );
     }
@@ -47,7 +47,7 @@ class MapResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateServiceWithNoConfig()
     {
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('config', array());
+        $serviceManager->setService('config', []);
 
         $factory = new MapResolverServiceFactory();
         /* @var MapResolver */

@@ -2,30 +2,30 @@
 
 namespace AssetManagerTest\Service;
 
-use Assetic\Asset\AssetInterface;
 use Assetic\Asset\StringAsset;
-use Assetic\Filter\FilterInterface;
+use Assetic\Contracts\Asset\AssetInterface;
+use Assetic\Contracts\Filter\FilterInterface;
 use AssetManager\Service\AssetFilterManager;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
+class AssetFilterManagerTest extends TestCase
 {
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/CustomFilter.php';
     }
 
     public function testNulledValuesAreSkipped()
     {
-        $assetFilterManager = new AssetFilterManager(array(
-        'test/path.test' => array(
-            'null_filters' => null
-        )
-        ));
+        $assetFilterManager = new AssetFilterManager([
+            'test/path.test' => [
+                'null_filters' => null
+            ]
+        ]);
 
         $asset = new StringAsset('Herp Derp');
 
@@ -36,13 +36,13 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
 
     public function testensureByService()
     {
-        $assetFilterManager = new AssetFilterManager(array(
-            'test/path.test' => array(
-                array(
+        $assetFilterManager = new AssetFilterManager([
+            'test/path.test' => [
+                [
                     'service' => 'testFilter',
-                ),
-            ),
-        ));
+                ],
+            ],
+        ]);
 
         $serviceManager = new ServiceManager();
         $serviceManager->setService('testFilter', new \CustomFilter());
@@ -60,13 +60,13 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
      */
     public function testensureByServiceInvalid()
     {
-        $assetFilterManager = new AssetFilterManager(array(
-            'test/path.test' => array(
-                array(
+        $assetFilterManager = new AssetFilterManager([
+            'test/path.test' => [
+                [
                     'service' => 9,
-                ),
-            ),
-        ));
+                ],
+            ],
+        ]);
 
         $serviceManager = new ServiceManager();
         $serviceManager->setService('testFilter', new \CustomFilter());
@@ -84,31 +84,31 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
      */
     public function testensureByInvalid()
     {
-        $assetFilterManager = new AssetFilterManager(array(
-            'test/path.test' => array(
-                array(
-                ),
-            ),
-        ));
+        $assetFilterManager = new AssetFilterManager([
+            'test/path.test' => [
+                [
+                ],
+            ],
+        ]);
 
         $asset = new StringAsset('Herp derp');
 
         $assetFilterManager->setFilters('test/path.test', $asset);
     }
-    
+
     public function testFiltersAreInstantiatedOnce()
     {
-        $assetFilterManager = new AssetFilterManager(array(
-            'test/path.test' => array(
-                array(
+        $assetFilterManager = new AssetFilterManager([
+            'test/path.test' => [
+                [
                     'filter' => 'CustomFilter'
-                ),
-            ),
-        ));
-        
+                ],
+            ],
+        ]);
+
         $filterInstance = null;
-        
-        $asset = $this->getMock(AssetInterface::class);
+
+        $asset = $this->getMockBuilder(AssetInterface::class)->getMock();
         $asset
             ->expects($this->any())
             ->method('ensureFilter')
@@ -116,9 +116,9 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
                 if ($filterInstance === null) {
                     $filterInstance = $filter;
                 }
-                return  $filter === $filterInstance;
+                return $filter === $filterInstance;
             }));
-        
+
         $assetFilterManager->setFilters('test/path.test', $asset);
         $assetFilterManager->setFilters('test/path.test', $asset);
     }

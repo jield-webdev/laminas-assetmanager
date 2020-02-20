@@ -4,29 +4,28 @@ namespace AssetManagerTest\Service;
 
 use AssetManager\Service\AssetCacheManager;
 use AssetManager\Service\AssetCacheManagerServiceFactory;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class AssetCacheManagerServiceFactoryTest extends PHPUnit_Framework_TestCase
+class AssetCacheManagerServiceFactoryTest extends TestCase
 {
     public function testConstruct()
     {
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                'asset_manager' => array(
-                    'caching' => array(
-                        'default' => array(
+            [
+                'asset_manager' => [
+                    'caching' => [
+                        'default' => [
                             'cache' => 'Apc',
-                        ),
-                    ),
-                ),
-            )
+                        ],
+                    ],
+                ],
+            ]
         );
 
-        $assetManager = new AssetCacheManagerServiceFactory($serviceManager);
-
+        $assetManager = new AssetCacheManagerServiceFactory();
         $service = $assetManager->createService($serviceManager);
 
         $this->assertTrue($service instanceof AssetCacheManager);

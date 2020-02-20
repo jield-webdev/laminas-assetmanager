@@ -2,16 +2,17 @@
 
 namespace AssetManagerTest\Cache;
 
-use Assetic\Cache\CacheInterface;
+use Assetic\Contracts\Cache\CacheInterface;
 use AssetManager\Cache\FilePathCache;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class FilePathCacheTest extends PHPUnit_Framework_TestCase
+
+class FilePathCacheTest extends TestCase
 {
     public function testConstruct()
     {
         $cache = new FilePathCache('/imagination', 'bacon.porn');
-        $this->assertTrue($cache instanceof CacheInterface);
+        $this->assertInstanceOf(CacheInterface::class, $cache);
 
         $this->assertAttributeEquals(
             '/imagination',
@@ -59,14 +60,14 @@ class FilePathCacheTest extends PHPUnit_Framework_TestCase
     public function testSetMayNotWriteFile()
     {
         restore_error_handler(); // Previous test fails, so doesn't unset.
-        $time = time();
+        $time     = time();
         $sentence = 'I am, what I am. Cached data, please don\'t hate, '
             . 'for we are all equals. Except you, you\'re a dick.';
-        $base = '/tmp/_cachetest.' . $time . '/';
+        $base     = '/tmp/_cachetest.' . $time . '/';
         mkdir($base, 0777);
-        mkdir($base.'readonly', 0400, true);
+        mkdir($base . 'readonly', 0400, true);
 
-        $cache = new FilePathCache($base.'readonly', 'bacon.'.$time.'.hammertime');
+        $cache = new FilePathCache($base . 'readonly', 'bacon.' . $time . '.hammertime');
         $cache->set('bacon', $sentence);
     }
 
@@ -76,13 +77,13 @@ class FilePathCacheTest extends PHPUnit_Framework_TestCase
     public function testSetMayNotWriteDir()
     {
         restore_error_handler(); // Previous test fails, so doesn't unset.
-        $time = time()+1;
+        $time     = time() + 1;
         $sentence = 'I am, what I am. Cached data, please don\'t hate, '
             . 'for we are all equals. Except you, you\'re a dick.';
-        $base = '/tmp/_cachetest.' . $time . '/';
+        $base     = '/tmp/_cachetest.' . $time . '/';
         mkdir($base, 0400, true);
 
-        $cache = new FilePathCache($base.'readonly', 'bacon.'.$time.'.hammertime');
+        $cache = new FilePathCache($base . 'readonly', 'bacon.' . $time . '.hammertime');
 
         $cache->set('bacon', $sentence);
 
@@ -94,16 +95,16 @@ class FilePathCacheTest extends PHPUnit_Framework_TestCase
     public function testSetCanNotWriteToFileThatExists()
     {
         restore_error_handler(); // Previous test fails, so doesn't unset.
-        $time = time()+333;
+        $time     = time() + 333;
         $sentence = 'I am, what I am. Cached data, please don\'t hate, '
             . 'for we are all equals. Except you, you\'re a dick.';
-        $base = '/tmp/_cachetest.' . $time . '/';
+        $base     = '/tmp/_cachetest.' . $time . '/';
         mkdir($base, 0777);
 
-        $fileName = 'sausage.'.$time.'.iceicebaby';
+        $fileName = 'sausage.' . $time . '.iceicebaby';
 
-        touch($base.'AssetManagerFilePathCache_' . $fileName);
-        chmod($base.'AssetManagerFilePathCache_' . $fileName, 0400);
+        touch($base . 'AssetManagerFilePathCache_' . $fileName);
+        chmod($base . 'AssetManagerFilePathCache_' . $fileName, 0400);
 
         $cache = new FilePathCache($base, $fileName);
 
@@ -112,14 +113,14 @@ class FilePathCacheTest extends PHPUnit_Framework_TestCase
 
     public function testSetSuccess()
     {
-        $time       = time();
+        $time     = time();
         $sentence = 'I am, what I am. Cached data, please don\'t hate, '
             . 'for we are all equals. Except you, you\'re a dick.';
-        $base       = '/tmp/_cachetest.' . $time . '/';
-        $cache      = new FilePathCache($base, 'bacon.'.$time);
+        $base     = '/tmp/_cachetest.' . $time . '/';
+        $cache    = new FilePathCache($base, 'bacon.' . $time);
 
         $cache->set('bacon', $sentence);
-        $this->assertEquals($sentence, file_get_contents($base.'bacon.'.$time));
+        $this->assertEquals($sentence, file_get_contents($base . 'bacon.' . $time));
     }
 
     /**
@@ -134,11 +135,11 @@ class FilePathCacheTest extends PHPUnit_Framework_TestCase
 
     public function testRemoveSuccess()
     {
-        $time       = time();
+        $time     = time();
         $sentence = 'I am, what I am. Cached data, please don\'t hate, '
             . 'for we are all equals. Except you, you\'re a dick.';
-        $base       = '/tmp/_cachetest.' . $time . '/';
-        $cache      = new FilePathCache($base, 'bacon.'.$time);
+        $base     = '/tmp/_cachetest.' . $time . '/';
+        $cache    = new FilePathCache($base, 'bacon.' . $time);
 
         $cache->set('bacon', $sentence);
 

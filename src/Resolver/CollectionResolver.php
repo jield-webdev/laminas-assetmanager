@@ -3,12 +3,12 @@
 namespace AssetManager\Resolver;
 
 use Assetic\Asset\AssetCollection;
-use Assetic\Asset\AssetInterface;
+use Assetic\Contracts\Asset\AssetInterface;
 use AssetManager\Exception;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetFilterManagerAwareInterface;
-use Traversable;
 use Laminas\Stdlib\ArrayUtils;
+use Traversable;
 
 /**
  * This resolver allows the resolving of collections.
@@ -33,7 +33,7 @@ class CollectionResolver implements
     /**
      * @var array the collections
      */
-    protected $collections = array();
+    protected $collections = [];
 
     /**
      * Constructor
@@ -42,9 +42,19 @@ class CollectionResolver implements
      *
      * @param array|Traversable $collections
      */
-    public function __construct($collections = array())
+    public function __construct($collections = [])
     {
         $this->setCollections($collections);
+    }
+
+    /**
+     * Retrieve the collections
+     *
+     * @return array
+     */
+    public function getCollections()
+    {
+        return $this->collections;
     }
 
     /**
@@ -52,7 +62,7 @@ class CollectionResolver implements
      *
      * Collections should be arrays or Traversable objects with name => path pairs
      *
-     * @param  array|Traversable                  $collections
+     * @param array|Traversable $collections
      * @throws Exception\InvalidArgumentException
      */
     public function setCollections($collections)
@@ -73,36 +83,6 @@ class CollectionResolver implements
     }
 
     /**
-     * Set the aggregate resolver.
-     *
-     * @param ResolverInterface $aggregateResolver
-     */
-    public function setAggregateResolver(ResolverInterface $aggregateResolver)
-    {
-        $this->aggregateResolver = $aggregateResolver;
-    }
-
-    /**
-     * Get the aggregate resolver.
-     *
-     * @return ResolverInterface
-     */
-    public function getAggregateResolver()
-    {
-        return $this->aggregateResolver;
-    }
-
-    /**
-     * Retrieve the collections
-     *
-     * @return array
-     */
-    public function getCollections()
-    {
-        return $this->collections;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function resolve($name)
@@ -117,10 +97,9 @@ class CollectionResolver implements
             );
         }
 
-        $collection = new AssetCollection;
+        $collection = new AssetCollection();
         $mimeType   = null;
         $collection->setTargetPath($name);
-
         foreach ($this->collections[$name] as $asset) {
 
             if (!is_string($asset)) {
@@ -128,13 +107,14 @@ class CollectionResolver implements
                     'Asset should be of type string. got ' . gettype($asset)
                 );
             }
+
             if (null === ($res = $this->getAggregateResolver()->resolve($asset))) {
                 throw new Exception\RuntimeException("Asset '$asset' could not be found.");
             }
 
             if (!$res instanceof AssetInterface) {
                 throw new Exception\RuntimeException(
-                    "Asset '$asset' does not implement Assetic\\Asset\\AssetInterface."
+                    "Asset '$asset' does not implement Assetic\\Contracts\\Asset\\AssetInterface."
                 );
             }
 
@@ -160,13 +140,23 @@ class CollectionResolver implements
     }
 
     /**
-     * Set the AssetFilterManager.
+     * Get the aggregate resolver.
      *
-     * @param AssetFilterManager $filterManager
+     * @return ResolverInterface
      */
-    public function setAssetFilterManager(AssetFilterManager $filterManager)
+    public function getAggregateResolver()
     {
-        $this->filterManager = $filterManager;
+        return $this->aggregateResolver;
+    }
+
+    /**
+     * Set the aggregate resolver.
+     *
+     * @param ResolverInterface $aggregateResolver
+     */
+    public function setAggregateResolver(ResolverInterface $aggregateResolver)
+    {
+        $this->aggregateResolver = $aggregateResolver;
     }
 
     /**
@@ -177,6 +167,16 @@ class CollectionResolver implements
     public function getAssetFilterManager()
     {
         return $this->filterManager;
+    }
+
+    /**
+     * Set the AssetFilterManager.
+     *
+     * @param AssetFilterManager $filterManager
+     */
+    public function setAssetFilterManager(AssetFilterManager $filterManager)
+    {
+        $this->filterManager = $filterManager;
     }
 
     /**

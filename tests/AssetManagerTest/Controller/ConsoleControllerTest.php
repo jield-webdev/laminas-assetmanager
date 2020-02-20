@@ -9,17 +9,18 @@ use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetManager;
 use AssetManager\Service\MimeResolver;
 use JSMin;
-use PHPUnit_Framework_TestCase;
 use Laminas\Console\Adapter\AdapterInterface;
 use Laminas\Console\Request as ConsoleRequest;
 use Laminas\Mvc\Console\Router\RouteMatch;
 use Laminas\Mvc\MvcEvent;
-use Laminas\Mvc\Router\RouteMatch as V2RouteMatch;
+use Laminas\Router\Http\RouteMatch as V2RouteMatch;
 use Laminas\ServiceManager\ServiceLocatorInterface;
 use Laminas\View\Resolver\ResolverInterface;
+use PHPUnit\Framework\TestCase;
 
-class ConsoleControllerTest extends PHPUnit_Framework_TestCase
+class ConsoleControllerTest extends TestCase
 {
+    protected static $assetName;
     /**
      *
      * @var ConsoleController
@@ -28,36 +29,35 @@ class ConsoleControllerTest extends PHPUnit_Framework_TestCase
     protected $request;
     protected $routeMatch;
     protected $event;
-    protected static $assetName;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$assetName = '_assettest.' . time();
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/JSMin.inc';
 
-        $config = array(
-            'filters' => array(
-                self::$assetName => array(
-                    array(
+        $config = [
+            'filters' => [
+                self::$assetName => [
+                    [
                         'filter' => 'JSMin',
-                    ),
-                ),
-            ),
-        );
+                    ],
+                ],
+            ],
+        ];
 
         $assetFilterManager = new AssetFilterManager($config['filters']);
-        $assetCacheManager = $this->getAssetCacheManager();
+        $assetCacheManager  = $this->getAssetCacheManager();
 
         $resolver     = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
         $assetManager = new AssetManager($resolver, $config);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
 
-        $this->request = new ConsoleRequest();
+        $this->request    = new ConsoleRequest();
         $this->routeMatch = $this->createRouteMatch(['controller' => 'console']);
 
         $this->event = new MvcEvent();
@@ -66,15 +66,27 @@ class ConsoleControllerTest extends PHPUnit_Framework_TestCase
         $this->controller = new ConsoleController(
             $this->getMock(AdapterInterface::class),
             $assetManager,
-            array()
+            []
         );
         $this->controller->setEvent($this->event);
     }
 
-    public function createRouteMatch(array $params = [])
+    /**
+     * @return AssetCacheManager
+     */
+    protected function getAssetCacheManager()
     {
-        $class = class_exists(V2RouteMatch::class) ? V2RouteMatch::class : RouteMatch::class;
-        return new $class($params);
+        $serviceLocator    = $this->getMockBuilder(ServiceLocatorInterface::class)->getMock();
+        $config            = [
+            self::$assetName => [
+                'cache'   => 'FilePathCache',
+                'options' => [
+                    'dir' => sys_get_temp_dir()
+                ]
+            ],
+        ];
+        $assetCacheManager = new AssetCacheManager($serviceLocator, $config);
+        return $assetCacheManager;
     }
 
     /**
@@ -84,29 +96,17 @@ class ConsoleControllerTest extends PHPUnit_Framework_TestCase
     protected function getResolver()
     {
         $mimeResolver = new MimeResolver();
-        $resolver = new MapResolver(array(
+        $resolver     = new MapResolver([
             self::$assetName => __DIR__ . '/../../_files/require-jquery.js'
-        ));
+        ]);
         $resolver->setMimeResolver($mimeResolver);
         return $resolver;
     }
 
-    /**
-     * @return AssetCacheManager
-     */
-    protected function getAssetCacheManager()
+    public function createRouteMatch(array $params = [])
     {
-        $serviceLocator = $this->getMock(ServiceLocatorInterface::class);
-        $config = array(
-            self::$assetName => array(
-                'cache' => 'FilePathCache',
-                'options' => array(
-                    'dir' => sys_get_temp_dir()
-                )
-            ),
-        );
-        $assetCacheManager = new AssetCacheManager($serviceLocator, $config);
-        return $assetCacheManager;
+        $class = class_exists(V2RouteMatch::class) ? V2RouteMatch::class : RouteMatch::class;
+        return new $class($params);
     }
 
     public function testWarmupAction()

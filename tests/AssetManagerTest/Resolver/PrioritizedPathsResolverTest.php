@@ -7,17 +7,17 @@ use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\PrioritizedPathsResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
+class PrioritizedPathsResolverTest extends TestCase
 {
     public function testConstructor()
     {
         $resolver = new PrioritizedPathsResolver();
         $this->assertEmpty($resolver->getPaths()->toArray());
 
-        $resolver->addPaths(array(__DIR__));
-        $this->assertEquals(array(__DIR__ . DIRECTORY_SEPARATOR), $resolver->getPaths()->toArray());
+        $resolver->addPaths([__DIR__]);
+        $this->assertEquals([__DIR__ . DIRECTORY_SEPARATOR], $resolver->getPaths()->toArray());
         $this->assertTrue($resolver instanceof MimeResolverAwareInterface);
         $this->assertTrue($resolver instanceof ResolverInterface);
     }
@@ -33,31 +33,31 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('someDir' . DIRECTORY_SEPARATOR, $paths->top());
 
         $resolver->clearPaths();
-        $this->assertEquals(array(), $resolver->getPaths()->toArray());
+        $this->assertEquals([], $resolver->getPaths()->toArray());
     }
 
     public function testSetPaths()
     {
         $resolver = new PrioritizedPathsResolver();
-        $resolver->setPaths(array(
-            array(
-                'path' => 'dir3',
+        $resolver->setPaths([
+            [
+                'path'     => 'dir3',
                 'priority' => 750,
-            ),
-            array(
-                'path' => 'dir2',
+            ],
+            [
+                'path'     => 'dir2',
                 'priority' => 1000,
-            ),
-            array(
-                'path' => 'dir1',
+            ],
+            [
+                'path'     => 'dir1',
                 'priority' => 500,
-            ),
-        ));
+            ],
+        ]);
 
         $this->assertTrue($resolver->getPaths()->hasPriority(1000));
         $this->assertTrue($resolver->getPaths()->hasPriority(500));
 
-        $fetched = array();
+        $fetched = [];
 
         foreach ($resolver->getPaths() as $path) {
             $fetched[] = $path;
@@ -65,41 +65,41 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
 
         // order inverted because of how a stack is traversed
         $this->assertSame(
-            array('dir2' . DIRECTORY_SEPARATOR, 'dir3' . DIRECTORY_SEPARATOR, 'dir1' . DIRECTORY_SEPARATOR),
+            ['dir2' . DIRECTORY_SEPARATOR, 'dir3' . DIRECTORY_SEPARATOR, 'dir1' . DIRECTORY_SEPARATOR],
             $fetched
         );
 
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->setPaths('invalid');
     }
 
     public function testAddPaths()
     {
         $resolver = new PrioritizedPathsResolver();
-        $resolver->setPaths(array(
-            array(
-                'path' => 'dir3',
+        $resolver->setPaths([
+            [
+                'path'     => 'dir3',
                 'priority' => 750,
-            ),
-            array(
-                'path' => 'dir2',
+            ],
+            [
+                'path'     => 'dir2',
                 'priority' => 1000,
-            ),
-            array(
-                'path' => 'dir1',
+            ],
+            [
+                'path'     => 'dir1',
                 'priority' => 500,
-            ),
-        ));
+            ],
+        ]);
 
-        $resolver->addPaths(array(
+        $resolver->addPaths([
             'dir4',
-            array(
-                'path' => 'dir5',
+            [
+                'path'     => 'dir5',
                 'priority' => -5,
-            )
-        ));
+            ]
+        ]);
 
-        $fetched = array();
+        $fetched = [];
 
         foreach ($resolver->getPaths() as $path) {
             $fetched[] = $path;
@@ -107,13 +107,13 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
 
         // order inverted because of how a stack is traversed
         $this->assertSame(
-            array(
+            [
                 'dir2' . DIRECTORY_SEPARATOR,
                 'dir3' . DIRECTORY_SEPARATOR,
                 'dir1' . DIRECTORY_SEPARATOR,
                 'dir4' . DIRECTORY_SEPARATOR,
                 'dir5' . DIRECTORY_SEPARATOR,
-            ),
+            ],
             $fetched
         );
     }
@@ -121,25 +121,25 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
     public function testAddPath()
     {
         $resolver = new PrioritizedPathsResolver();
-        $resolver->setPaths(array(
-            array(
-                'path' => 'dir3',
+        $resolver->setPaths([
+            [
+                'path'     => 'dir3',
                 'priority' => 750,
-            ),
-            array(
-                'path' => 'dir2',
+            ],
+            [
+                'path'     => 'dir2',
                 'priority' => 1000,
-            ),
-            array(
-                'path' => 'dir1',
+            ],
+            [
+                'path'     => 'dir1',
                 'priority' => 500,
-            ),
-        ));
+            ],
+        ]);
 
         $resolver->addPath('dir4');
-        $resolver->addPath(array('path'=>'dir5', 'priority'=>-5));
+        $resolver->addPath(['path' => 'dir5', 'priority' => -5]);
 
-        $fetched = array();
+        $fetched = [];
 
         foreach ($resolver->getPaths() as $path) {
             $fetched[] = $path;
@@ -147,13 +147,13 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
 
         // order inverted because of how a stack is traversed
         $this->assertSame(
-            array(
+            [
                 'dir2' . DIRECTORY_SEPARATOR,
                 'dir3' . DIRECTORY_SEPARATOR,
                 'dir1' . DIRECTORY_SEPARATOR,
                 'dir4' . DIRECTORY_SEPARATOR,
                 'dir5' . DIRECTORY_SEPARATOR,
-            ),
+            ],
             $fetched
         );
     }
@@ -161,7 +161,7 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
     public function testSetPathsAllowsStringPaths()
     {
         $resolver = new PrioritizedPathsResolver();
-        $resolver->setPaths(array('dir1', 'dir2', 'dir3'));
+        $resolver->setPaths(['dir1', 'dir2', 'dir3']);
 
         $paths = $resolver->getPaths()->toArray();
         $this->assertCount(3, $paths);
@@ -174,8 +174,8 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
     public function testWillValidateGivenPathArray()
     {
         $resolver = new PrioritizedPathsResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
-        $resolver->addPath(array('invalid'));
+        $this->expectException(InvalidArgumentException::class);
+        $resolver->addPath(['invalid']);
     }
 
     public function testResolve()
@@ -221,7 +221,7 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
     public function testWillRefuseInvalidPath()
     {
         $resolver = new PrioritizedPathsResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(null);
     }
 

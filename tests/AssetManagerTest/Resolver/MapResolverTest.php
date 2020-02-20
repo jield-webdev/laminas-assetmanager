@@ -6,24 +6,24 @@ use Assetic\Asset;
 use AssetManager\Resolver\MapResolver;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class MapResolverTest extends PHPUnit_Framework_TestCase
+class MapResolverTest extends TestCase
 {
     public function testConstruct()
     {
         $resolver = new MapResolver(
-            array(
+            [
                 'key1' => 'value1',
                 'key2' => 'value2'
-            )
+            ]
         );
 
         $this->assertSame(
-            array(
+            [
                 'key1' => 'value1',
                 'key2' => 'value2'
-            ),
+            ],
             $resolver->getMap()
         );
     }
@@ -40,26 +40,26 @@ class MapResolverTest extends PHPUnit_Framework_TestCase
         $resolver->setMap(new MapIterable);
 
         $this->assertEquals(
-            array(
-                'mapName1' => array(
+            [
+                'mapName1' => [
                     'map 1.1',
                     'map 1.2',
                     'map 1.3',
                     'map 1.4',
-                ),
-                'mapName2' => array(
+                ],
+                'mapName2' => [
                     'map 2.1',
                     'map 2.2',
                     'map 2.3',
                     'map 2.4',
-                ),
-                'mapName3' => array(
+                ],
+                'mapName3' => [
                     'map 3.1',
                     'map 3.2',
                     'map 3.3',
                     'map 3.4',
-                )
-            ),
+                ]
+            ],
             $resolver->getMap()
         );
     }
@@ -76,7 +76,7 @@ class MapResolverTest extends PHPUnit_Framework_TestCase
     public function testGetMap()
     {
         $resolver = new MapResolver;
-        $this->assertSame(array(), $resolver->getMap());
+        $this->assertSame([], $resolver->getMap());
     }
 
     public function testResolveNull()
@@ -89,9 +89,9 @@ class MapResolverTest extends PHPUnit_Framework_TestCase
     {
         $resolver = new MapResolver;
 
-        $asset1 = array(
+        $asset1 = [
             'bacon' => 'porn',
-        );
+        ];
 
         $this->assertNull($resolver->setMap($asset1));
     }
@@ -106,14 +106,14 @@ class MapResolverTest extends PHPUnit_Framework_TestCase
 
         $resolver->setMimeResolver($mimeResolver);
 
-        $asset1 = array(
+        $asset1 = [
             'bacon' => __FILE__,
-        );
+        ];
 
         $resolver->setMap($asset1);
 
-        $asset      = $resolver->resolve('bacon');
-        $mimetype   = $mimeResolver->getMimeType(__FILE__);
+        $asset    = $resolver->resolve('bacon');
+        $mimetype = $mimeResolver->getMimeType(__FILE__);
 
         $this->assertTrue($asset instanceof Asset\FileAsset);
         $this->assertEquals($mimetype, $asset->mimetype);
@@ -126,19 +126,19 @@ class MapResolverTest extends PHPUnit_Framework_TestCase
         $mimeResolver = $this->getMock(MimeResolver::class);
 
         $mimeResolver->expects($this->any())
-                ->method('getMimeType')
-                ->with('http://foo.bar/')
-                ->will($this->returnValue('text/foo'));
+            ->method('getMimeType')
+            ->with('http://foo.bar/')
+            ->will($this->returnValue('text/foo'));
 
         $resolver->setMimeResolver($mimeResolver);
 
-        $asset1 = array(
+        $asset1 = [
             'bacon' => 'http://foo.bar/',
-        );
+        ];
 
         $resolver->setMap($asset1);
 
-        $asset      = $resolver->resolve('bacon');
+        $asset = $resolver->resolve('bacon');
 
         $this->assertTrue($asset instanceof Asset\HttpAsset);
         $this->assertSame('text/foo', $asset->mimetype);
@@ -151,10 +151,10 @@ class MapResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testCollect()
     {
-        $map = array(
+        $map      = [
             'foo' => 'bar',
             'baz' => 'qux',
-        );
+        ];
         $resolver = new MapResolver($map);
 
         $this->assertEquals(array_keys($map), $resolver->collect());

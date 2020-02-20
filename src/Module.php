@@ -4,6 +4,8 @@ namespace AssetManager;
 
 use Laminas\Console\Adapter\AdapterInterface;
 use Laminas\EventManager\EventInterface;
+use Laminas\EventManager\EventManagerInterface;
+use Laminas\Http\Response;
 use Laminas\Loader\AutoloaderFactory;
 use Laminas\Loader\StandardAutoloader;
 use Laminas\ModuleManager\Feature\AutoloaderProviderInterface;
@@ -27,13 +29,13 @@ class Module implements
      */
     public function getAutoloaderConfig()
     {
-        return array(
-            AutoloaderFactory::STANDARD_AUTOLOADER => array(
-                StandardAutoloader::LOAD_NS => array(
+        return [
+            AutoloaderFactory::STANDARD_AUTOLOADER => [
+                StandardAutoloader::LOAD_NS => [
                     __NAMESPACE__ => __DIR__,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     /**
@@ -41,7 +43,7 @@ class Module implements
      */
     public function getConfig()
     {
-        return include __DIR__ . '/../../config/module.config.php';
+        return include __DIR__ . '/../config/module.config.php';
     }
 
     /**
@@ -51,7 +53,7 @@ class Module implements
      */
     public function onDispatch(MvcEvent $event)
     {
-        /* @var $response \Laminas\Http\Response */
+        /* @var $response Response */
         $response = $event->getResponse();
         if (!method_exists($response, 'getStatusCode') || $response->getStatusCode() !== 404) {
             return;
@@ -75,27 +77,27 @@ class Module implements
     public function onBootstrap(EventInterface $event)
     {
         // Attach for dispatch, and dispatch.error (with low priority to make sure statusCode gets set)
-        /* @var $eventManager \Laminas\EventManager\EventManagerInterface */
+        /* @var $eventManager EventManagerInterface */
         $eventManager = $event->getTarget()->getEventManager();
-        $callback     = array($this, 'onDispatch');
+        $callback     = [$this, 'onDispatch'];
         $priority     = -9999999;
         $eventManager->attach(MvcEvent::EVENT_DISPATCH, $callback, $priority);
         $eventManager->attach(MvcEvent::EVENT_DISPATCH_ERROR, $callback, $priority);
     }
 
     /**
-     * @param \Laminas\Console\Adapter\AdapterInterface $console
+     * @param AdapterInterface $console
      * @return array
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function getConsoleUsage(AdapterInterface $console)
     {
-        return array(
+        return [
             'Warmup',
             'assetmanager warmup [--purge] [--verbose|-v]' => 'Warm AssetManager up',
-            array('--purge', '(optional) forces cache flushing'),
-            array('--verbose | -v', '(optional) verbose mode'),
-        );
+            ['--purge', '(optional) forces cache flushing'],
+            ['--verbose | -v', '(optional) verbose mode'],
+        ];
     }
 }

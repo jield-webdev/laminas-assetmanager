@@ -5,10 +5,10 @@ namespace AssetManagerTest\Service;
 use AssetManager\Resolver\CollectionResolver;
 use AssetManager\Resolver\ConcatResolver;
 use AssetManager\Service\ConcatResolverServiceFactory;
-use PHPUnit_Framework_TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class ConcatResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
+class ConcatResolverServiceFactoryTest extends TestCase
 {
     /**
      * Mainly to avoid regressions
@@ -18,26 +18,26 @@ class ConcatResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
-            array(
-                 'asset_manager' => array(
-                     'resolver_configs' => array(
-                         'concat' => array(
-                             'key1' => __FILE__,
-                             'key2' => __FILE__,
-                         ),
-                     ),
-                 ),
-            )
+            [
+                'asset_manager' => [
+                    'resolver_configs' => [
+                        'concat' => [
+                            'key1' => __FILE__,
+                            'key2' => __FILE__,
+                        ],
+                    ],
+                ],
+            ]
         );
 
         $factory = new ConcatResolverServiceFactory();
         /* @var CollectionResolver */
         $concatResolver = $factory->createService($serviceManager);
         $this->assertSame(
-            array(
-                 'key1' => __FILE__,
-                 'key2' => __FILE__,
-            ),
+            [
+                'key1' => __FILE__,
+                'key2' => __FILE__,
+            ],
             $concatResolver->getConcats()
         );
     }
@@ -48,7 +48,7 @@ class ConcatResolverServiceFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateServiceWithNoConfig()
     {
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('config', array());
+        $serviceManager->setService('config', []);
 
         $factory = new ConcatResolverServiceFactory();
         /* @var ConcatResolver */

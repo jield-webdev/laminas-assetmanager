@@ -3,7 +3,8 @@
 namespace AssetManager\Asset;
 
 use Assetic\Asset\BaseAsset;
-use Assetic\Filter\FilterInterface;
+use Assetic\Contracts\Asset\AssetInterface;
+use Assetic\Contracts\Filter\FilterInterface;
 use AssetManager\Exception;
 
 /**
@@ -11,69 +12,37 @@ use AssetManager\Exception;
  */
 class AggregateAsset extends BaseAsset
 {
+    public $mimetype;
     /**
      * @var int Timestamp of last modified date from asset
      */
     private $lastModified;
 
-    public $mimetype;
-
     /**
      * Constructor.
      *
-     * @param array  $content    The array of assets to be merged
-     * @param array  $filters    Filters for the asset
+     * @param array $content The array of assets to be merged
+     * @param array $filters Filters for the asset
      * @param string $sourceRoot The source asset root directory
      * @param string $sourcePath The source asset path
      */
-    public function __construct(array $content = array(), $filters = array(), $sourceRoot = null, $sourcePath = null)
+    public function __construct(array $content = [], $filters = [], $sourceRoot = null, $sourcePath = null)
     {
         parent::__construct($filters, $sourceRoot, $sourcePath);
         $this->processContent($content);
     }
 
     /**
-     * load asset
-     *
-     * @param FilterInterface $additionalFilter
-     */
-    public function load(FilterInterface $additionalFilter = null)
-    {
-        $this->doLoad($this->getContent(), $additionalFilter);
-    }
-
-    /**
-     * set last modified value of asset
-     *
-     * this is useful for cache mechanism detection id file has changed
-     *
-     * @param int $lastModified
-     */
-    public function setLastModified($lastModified)
-    {
-        $this->lastModified = $lastModified;
-    }
-
-    /**
-     * get last modified value from asset
-     *
-     * @return int|null
-     */
-    public function getLastModified()
-    {
-        return $this->lastModified;
-    }
-
-    /**
      * Loop through assets and merge content
      *
-     * @param string $content
+     * @param array $content
      *
      * @throws Exception\RuntimeException
      */
     private function processContent($content)
     {
         $this->mimetype = null;
+        /** @var AssetInterface $asset */
         foreach ($content as $asset) {
             if (null === $this->mimetype) {
                 $this->mimetype = $asset->mimetype;
@@ -99,5 +68,37 @@ class AggregateAsset extends BaseAsset
                 $this->getContent() . $asset->dump()
             );
         }
+    }
+
+    /**
+     * get last modified value from asset
+     *
+     * @return int|null
+     */
+    public function getLastModified()
+    {
+        return $this->lastModified;
+    }
+
+    /**
+     * set last modified value of asset
+     *
+     * this is useful for cache mechanism detection id file has changed
+     *
+     * @param int $lastModified
+     */
+    public function setLastModified($lastModified)
+    {
+        $this->lastModified = $lastModified;
+    }
+
+    /**
+     * load asset
+     *
+     * @param FilterInterface $additionalFilter
+     */
+    public function load(FilterInterface $additionalFilter = null)
+    {
+        $this->doLoad($this->getContent(), $additionalFilter);
     }
 }

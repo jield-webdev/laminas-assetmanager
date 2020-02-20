@@ -44,13 +44,13 @@
     "laminas/laminas-mvc-console": "laminas-mvc-console provides the ability to expose laminas-mvc as a console application"
   },
   "autoload": {
-    "psr-0": {
-      "AssetManager": "src/"
+    "psr-4": {
+      "AssetManager\\": "src/"
     }
   },
   "autoload-dev": {
-    "psr-0": {
-      "AssetManagerTest": "tests"
+    "psr-4": {
+      "AssetManagerTest\\": "tests"
     }
   }
 }

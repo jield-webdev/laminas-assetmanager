@@ -18,8 +18,8 @@ return [
         ],
         'aliases'    => [
             //Alias left here for BC
-            'mime_resolver'                             => AssetManager\Service\MimeResolver::class,
-            'AssetManager\Service\AggregateResolver'    => AssetManager\Resolver\AggregateResolver::class
+            'mime_resolver'                          => AssetManager\Service\MimeResolver::class,
+            'AssetManager\Service\AggregateResolver' => AssetManager\Resolver\AggregateResolver::class
         ],
     ],
     'asset_manager'   => [
@@ -47,7 +47,7 @@ return [
         'factories' => [
             AssetManager\View\Helper\Asset::class => AssetManager\Service\AssetViewHelperFactory::class
         ],
-        'aliases' => [
+        'aliases'   => [
             'asset' => AssetManager\View\Helper\Asset::class
         ]
     ],
