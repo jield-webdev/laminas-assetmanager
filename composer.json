@@ -1,5 +1,5 @@
 {
-  "name": "rwoverdijk/assetmanager",
+  "name": "jield-webdev/laminas-assetmanager",
   "description": "An assetmanager module for Laminas",
   "license": "BSD-2-Clause",
   "type": "library",
@@ -8,7 +8,7 @@
     "asset manager",
     "laminas"
   ],
-  "homepage": "https://github.com/RWOverdijk/AssetManager",
+  "homepage": "https://github.com/jield-webdev/laminas-assetmanager",
   "authors": [
     {
       "name": "Wesley Overdijk",
@@ -19,6 +19,11 @@
       "name": "Marco Pivetta",
       "email": "ocramius@gmail.com",
       "homepage": "http://ocramius.github.com/"
+    },
+    {
+      "name": "Johan van der Heide",
+      "email": "info@jield.nl",
+      "homepage": "https://jield.nl"
     }
   ],
   "require": {
@@ -37,11 +42,17 @@
     "laminas/laminas-view": "^2.8.1",
     "laminas/laminas-cache": "^2.7.1",
     "laminas/laminas-console": "^2.6",
-    "phpunit/phpunit": "^4.8",
+    "phpunit/phpunit": "^9",
     "squizlabs/php_codesniffer": "~1.5.0"
   },
   "suggest": {
     "laminas/laminas-mvc-console": "laminas-mvc-console provides the ability to expose laminas-mvc as a console application"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.0-dev",
+      "dev-develop": "3.1-dev"
+    }
   },
   "autoload": {
     "psr-4": {
