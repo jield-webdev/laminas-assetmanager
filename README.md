@@ -18,7 +18,7 @@ In a nutshell, this module allows you to package assets with your module working
 
 ```sh
 ./composer.phar require jield-webdev/laminas-assetmanager
-#when asked for a version, type "3.*".
+#when asked for a version, type "1.*".
 ```
 
 ## Usage
