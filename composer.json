@@ -52,5 +52,8 @@
     "psr-0": {
       "AssetManagerTest": "tests"
     }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
   }
 }
