@@ -1,15 +1,15 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use AssetManager\Exception\InvalidArgumentException;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\PrioritizedPathsResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
+class PrioritizedPathsResolverTest extends TestCase
 {
     public function testConstructor()
     {
@@ -69,7 +69,7 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
             $fetched
         );
 
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->setPaths('invalid');
     }
 
@@ -137,7 +137,7 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
         ));
 
         $resolver->addPath('dir4');
-        $resolver->addPath(array('path'=>'dir5', 'priority'=>-5));
+        $resolver->addPath(array('path' => 'dir5', 'priority' => -5));
 
         $fetched = array();
 
@@ -174,7 +174,7 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
     public function testWillValidateGivenPathArray()
     {
         $resolver = new PrioritizedPathsResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(array('invalid'));
     }
 
@@ -221,7 +221,7 @@ class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
     public function testWillRefuseInvalidPath()
     {
         $resolver = new PrioritizedPathsResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(null);
     }
 

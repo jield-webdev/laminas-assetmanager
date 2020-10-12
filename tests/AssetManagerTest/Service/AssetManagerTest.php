@@ -3,7 +3,7 @@
 namespace AssetManagerTest\Service;
 
 use Assetic\Asset;
-use AssetManager\Cache\FilePathCache;
+use AssetManager\Exception\RuntimeException;
 use AssetManager\Resolver\AggregateResolver;
 use AssetManager\Resolver\CollectionResolver;
 use AssetManager\Resolver\ResolverInterface;
@@ -11,17 +11,19 @@ use AssetManager\Service\AssetCacheManager;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
 use Laminas\Console\Request as ConsoleRequest;
 use Laminas\Http\PhpEnvironment\Request;
 use Laminas\Http\Response;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use TypeError;
 
-class AssetManagerTest extends PHPUnit_Framework_TestCase
+class AssetManagerTest extends TestCase
 {
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/JSMin.inc';
         require_once __DIR__ . '/../../_files/CustomFilter.php';
@@ -41,14 +43,14 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
     /**
      * @param string $resolveTo
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject|ResolverInterface
+     * @return MockObject|ResolverInterface
      */
     protected function getResolver($resolveTo = __FILE__)
     {
-        $mimeResolver    = new MimeResolver;
-        $asset           = new Asset\FileAsset($resolveTo);
+        $mimeResolver = new MimeResolver;
+        $asset = new Asset\FileAsset($resolveTo);
         $asset->mimetype = $mimeResolver->getMimeType($resolveTo);
-        $resolver        = $this->getMock(ResolverInterface::class);
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $resolver
             ->expects($this->once())
             ->method('resolve')
@@ -60,8 +62,8 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function getCollectionResolver()
     {
-        $aggregateResolver  = new AggregateResolver;
-        $mockedResolver     = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $aggregateResolver = new AggregateResolver;
+        $mockedResolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
         $collArr = array(
             'blah.js' => array(
                 'asset-path'
@@ -78,31 +80,27 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testConstruct()
     {
-        $resolver     = $this->getMock(ResolverInterface::class);
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver, array('herp', 'derp'));
 
         $this->assertSame($resolver, $assetManager->getResolver());
-        $this->assertAttributeEquals(array('herp', 'derp'), 'config', $assetManager);
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testConstructFailsOnOtherType()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         new AssetManager('invalid');
     }
 
     public function testInvalidRequest()
     {
-        $mimeResolver    = new MimeResolver;
-        $asset           = new Asset\FileAsset(__FILE__);
+        $mimeResolver = new MimeResolver;
+        $asset = new Asset\FileAsset(__FILE__);
         $asset->mimetype = $mimeResolver->getMimeType(__FILE__);
-        $resolver        = $this->getMock(ResolverInterface::class);
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $resolver
             ->expects($this->any())
             ->method('resolve')
@@ -111,7 +109,7 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
         $request = new ConsoleRequest();
 
-        $assetManager    = new AssetManager($resolver);
+        $assetManager = new AssetManager($resolver);
         $resolvesToAsset = $assetManager->resolvesToAsset($request);
 
         $this->assertFalse($resolvesToAsset);
@@ -119,7 +117,7 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testResolvesToAsset()
     {
-        $assetManager    = new AssetManager($this->getResolver());
+        $assetManager = new AssetManager($this->getResolver());
         $resolvesToAsset = $assetManager->resolvesToAsset($this->getRequest());
 
         $this->assertTrue($resolvesToAsset);
@@ -138,7 +136,7 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testResolvesToAssetReturnsBoolean()
     {
-        $assetManager    = new AssetManager($this->getResolver());
+        $assetManager = new AssetManager($this->getResolver());
         $resolvesToAsset = $assetManager->resolvesToAsset($this->getRequest());
 
         $this->assertTrue(is_bool($resolvesToAsset));
@@ -150,22 +148,22 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testSetResolver()
     {
-        $assetManager = new AssetManager($this->getMock(ResolverInterface::class));
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
+        $assetManager = new AssetManager($resolver);
 
-        $newResolver = $this->getMock(ResolverInterface::class);
+        $newResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager->setResolver($newResolver);
 
         $this->assertSame($newResolver, $assetManager->getResolver());
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testSetResolverFailsOnInvalidType()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         new AssetManager('invalid');
     }
@@ -176,7 +174,9 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testGetResolver()
     {
-        $resolver     = $this->getMock(ResolverInterface::class);
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver);
 
         $this->assertSame($resolver, $assetManager->getResolver());
@@ -197,11 +197,11 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         $assetFilterManager = new AssetFilterManager($config['filters']);
         $assetCacheManager = $this->getAssetCacheManagerMock();
 
-        $response     = new Response;
-        $resolver     = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
-        $request      = $this->getRequest();
+        $response = new Response;
+        $resolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $request = $this->getRequest();
         $assetManager = new AssetManager($resolver, $config);
-        $minified     = \JSMin::minify(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'));
+        $minified = \JSMin::minify(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'));
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
         $this->assertTrue($assetManager->resolvesToAsset($request));
@@ -225,11 +225,11 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         $assetCacheManager = $this->getAssetCacheManagerMock();
 
         $mimeResolver = new MimeResolver;
-        $response     = new Response;
-        $resolver     = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
-        $request      = $this->getRequest();
+        $response = new Response;
+        $resolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $request = $this->getRequest();
         $assetManager = new AssetManager($resolver, $config);
-        $minified     = \JSMin::minify(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'));
+        $minified = \JSMin::minify(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'));
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
@@ -251,19 +251,19 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
             ),
         );
 
-        $resolver           = $this->getCollectionResolver();
+        $resolver = $this->getCollectionResolver();
         $assetFilterManager = new AssetFilterManager($config['filters']);
-        $mimeResolver       = new MimeResolver;
+        $mimeResolver = new MimeResolver;
         $assetFilterManager->setMimeResolver($mimeResolver);
         $resolver->setAssetFilterManager($assetFilterManager);
-        
-        $response     = new Response;
-        $request      = $this->getRequest();
+
+        $response = new Response;
+        $request = $this->getRequest();
         // Have to change uri because asset-path would cause an infinite loop
         $request->setUri('http://localhost/base-path/blah.js');
-        
+
         $assetCacheManager = $this->getAssetCacheManagerMock();
-        $assetManager      = new AssetManager($resolver->getAggregateResolver(), $config);
+        $assetManager = new AssetManager($resolver->getAggregateResolver(), $config);
         $assetManager->setAssetCacheManager($assetCacheManager);
         $assetManager->setAssetFilterManager($assetFilterManager);
 
@@ -289,12 +289,12 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         $assetFilterManager = new AssetFilterManager($config['filters']);
         $assetCacheManager = $this->getAssetCacheManagerMock();
 
-        $mimeResolver       = new MimeResolver;
-        $response           = new Response;
-        $resolver           = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
-        $request            = $this->getRequest();
-        $assetManager       = new AssetManager($resolver, $config);
-        $minified           = \JSMin::minify(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'));
+        $mimeResolver = new MimeResolver;
+        $response = new Response;
+        $resolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $request = $this->getRequest();
+        $assetManager = new AssetManager($resolver, $config);
+        $minified = \JSMin::minify(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'));
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
@@ -318,11 +318,11 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
         $assetFilterManager = new AssetFilterManager($config['filters']);
         $assetCacheManager = $this->getAssetCacheManagerMock();
-        $mimeResolver       = new MimeResolver;
-        $response           = new Response;
-        $resolver           = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
-        $request            = $this->getRequest();
-        $assetManager       = new AssetManager($resolver, $config);
+        $mimeResolver = new MimeResolver;
+        $response = new Response;
+        $resolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $request = $this->getRequest();
+        $assetManager = new AssetManager($resolver, $config);
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
@@ -336,18 +336,17 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
     {
         $config = array(
             'filters' => array(
-                'asset-path' => array(
-                ),
+                'asset-path' => array(),
             ),
         );
 
         $assetFilterManager = new AssetFilterManager($config['filters']);
-        $assetCacheManager  = $this->getAssetCacheManagerMock();
-        $mimeResolver       = new MimeResolver;
-        $response           = new Response;
-        $resolver           = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
-        $request            = $this->getRequest();
-        $assetManager       = new AssetManager($resolver, $config);
+        $assetCacheManager = $this->getAssetCacheManagerMock();
+        $mimeResolver = new MimeResolver;
+        $response = new Response;
+        $resolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $request = $this->getRequest();
+        $assetManager = new AssetManager($resolver, $config);
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
@@ -357,11 +356,9 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(file_get_contents(__DIR__ . '/../../_files/require-jquery.js'), $response->getBody());
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testSetFalseClassFilter()
     {
+        $this->expectException(RuntimeException::class);
         $config = array(
             'filters' => array(
                 'asset-path' => array(
@@ -373,12 +370,12 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         );
 
         $assetFilterManager = new AssetFilterManager($config['filters']);
-        $assetCacheManager  = $this->getAssetCacheManagerMock();
-        $mimeResolver       = new MimeResolver;
-        $response           = new Response;
-        $resolver           = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
-        $request            = $this->getRequest();
-        $assetManager       = new AssetManager($resolver, $config);
+        $assetCacheManager = $this->getAssetCacheManagerMock();
+        $mimeResolver = new MimeResolver;
+        $response = new Response;
+        $resolver = $this->getResolver(__DIR__ . '/../../_files/require-jquery.js');
+        $request = $this->getRequest();
+        $assetManager = new AssetManager($resolver, $config);
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
@@ -389,15 +386,15 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
     public function testSetAssetOnResponse()
     {
         $assetFilterManager = new AssetFilterManager();
-        $assetCacheManager  = $this->getAssetCacheManagerMock();
-        $mimeResolver       = new MimeResolver;
-        $assetManager       = new AssetManager($this->getResolver());
+        $assetCacheManager = $this->getAssetCacheManagerMock();
+        $mimeResolver = new MimeResolver;
+        $assetManager = new AssetManager($this->getResolver());
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
-        $request            = $this->getRequest();
+        $request = $this->getRequest();
         $assetManager->resolvesToAsset($request);
-        $response           = $assetManager->setAssetOnResponse(new Response);
+        $response = $assetManager->setAssetOnResponse(new Response);
 
         $this->assertSame(file_get_contents(__FILE__), $response->getContent());
     }
@@ -418,13 +415,11 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($assetManager->assetSetOnResponse());
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testSetAssetOnResponseNoMimeType()
     {
-        $asset    = new Asset\FileAsset(__FILE__);
-        $resolver = $this->getMock(ResolverInterface::class);
+        $this->expectException(RuntimeException::class);
+        $asset = new Asset\FileAsset(__FILE__);
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $resolver
             ->expects($this->once())
             ->method('resolve')
@@ -432,7 +427,7 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue($asset));
 
         $assetManager = new AssetManager($resolver);
-        $request      = $this->getRequest();
+        $request = $this->getRequest();
         $assetManager->resolvesToAsset($request);
 
         $assetManager->setAssetOnResponse(new Response);
@@ -440,15 +435,15 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testResponseHeadersForAsset()
     {
-        $mimeResolver       = new MimeResolver;
+        $mimeResolver = new MimeResolver;
         $assetFilterManager = new AssetFilterManager();
-        $assetCacheManager  = $this->getAssetCacheManagerMock();
-        $assetManager       = new AssetManager($this->getResolver());
+        $assetCacheManager = $this->getAssetCacheManagerMock();
+        $assetManager = new AssetManager($this->getResolver());
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
         $assetManager->setAssetCacheManager($assetCacheManager);
 
-        $request  = $this->getRequest();
+        $request = $this->getRequest();
         $assetManager->resolvesToAsset($request);
         $response = $assetManager->setAssetOnResponse(new Response);
         $thisFile = file_get_contents(__FILE__);
@@ -467,12 +462,12 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         $this->assertSame($headers, $response->getHeaders()->toString());
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testSetAssetOnReponseFailsWhenNotResolved()
     {
-        $resolver     = $this->getMock(ResolverInterface::class);
+        $this->expectException(RuntimeException::class);
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver);
 
         $assetManager->setAssetOnResponse(new Response);
@@ -480,8 +475,10 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
 
     public function testResolvesToAssetNotFound()
     {
-        $resolver        = $this->getMock(ResolverInterface::class);
-        $assetManager    = new AssetManager($resolver);
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
+        $assetManager = new AssetManager($resolver);
         $resolvesToAsset = $assetManager->resolvesToAsset(new Request);
 
         $this->assertFalse($resolvesToAsset);
@@ -496,9 +493,9 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
         echo "They all should be gone soon...\n";
 
         $assetFilterManager = new AssetFilterManager();
-        $assetCacheManager  = $this->getAssetCacheManagerMock();
-        $mimeResolver       = new MimeResolver;
-        $assetManager       = new AssetManager($this->getResolver(), array('clear_output_buffer' => true));
+        $assetCacheManager = $this->getAssetCacheManagerMock();
+        $mimeResolver = new MimeResolver;
+        $assetManager = new AssetManager($this->getResolver(), array('clear_output_buffer' => true));
 
         $assetFilterManager->setMimeResolver($mimeResolver);
         $assetManager->setAssetFilterManager($assetFilterManager);
@@ -523,11 +520,12 @@ class AssetManagerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function getAssetCacheManagerMock()
     {
-        $assetCacheManager = $this->getMockBuilder(AssetCacheManager::class)
+        $assetCacheManager = $this
+            ->getMockBuilder(AssetCacheManager::class)
             ->disableOriginalConstructor()
             ->getMock();
 

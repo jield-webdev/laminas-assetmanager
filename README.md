@@ -62,7 +62,7 @@ return array(
         ),
         'caching' => array(
             'js/d.js' => array(
-                'cache'     => 'Apc',
+                'cache'     => 'Filesystem',
             ),
         ),
     ),

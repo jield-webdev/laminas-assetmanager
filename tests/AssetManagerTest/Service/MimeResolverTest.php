@@ -1,14 +1,15 @@
 <?php
-namespace AssetManager\Service;
+namespace AssetManagerTest\Service;
 
-use PHPUnit_Framework_TestCase;
+use AssetManager\Service\MimeResolver;
+use PHPUnit\Framework\TestCase;
 
-class MimeResolverTest extends PHPUnit_Framework_TestCase
+class MimeResolverTest extends TestCase
 {
     public function testGetMimeType()
     {
         //Fails
-        $mimeResolver = new MimeResolver;
+        $mimeResolver = new MimeResolver();
         $this->assertEquals('text/plain', $mimeResolver->getMimeType('bacon.porn'));
 
         //Success
