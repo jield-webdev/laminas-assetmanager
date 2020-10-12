@@ -1,14 +1,14 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use Assetic\Asset;
 use AssetManager\Resolver\MapResolver;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class MapResolverTest extends PHPUnit_Framework_TestCase
+class MapResolverTest extends TestCase
 {
     public function testConstruct()
     {

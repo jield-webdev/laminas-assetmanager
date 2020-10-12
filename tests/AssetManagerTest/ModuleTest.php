@@ -5,6 +5,7 @@ namespace AssetManagerTest;
 use AssetManager\Module;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetManager;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_TestCase;
 use Laminas\Console\Response as ConsoleResponse;
 use Laminas\EventManager\Event;
@@ -19,7 +20,7 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
 /**
 * @covers AssetManager\Module
 */
-class ModuleTest extends PHPUnit_Framework_TestCase
+class ModuleTest extends TestCase
 {
     use EventListenerIntrospectionTrait;
 

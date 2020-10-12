@@ -1,15 +1,15 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use AssetManager\Exception\InvalidArgumentException;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\PrioritizedPathsResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PrioritizedPathsResolverTest extends PHPUnit_Framework_TestCase
+class PrioritizedPathsResolverTest extends TestCase
 {
     public function testConstructor()
     {

@@ -1,17 +1,16 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
-use Assetic\Asset;
 use AssetManager\Asset\AggregateAsset;
 use AssetManager\Resolver\AggregateResolverAwareInterface;
 use AssetManager\Resolver\ConcatResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ConcatResolverTest extends PHPUnit_Framework_TestCase
+class ConcatResolverTest extends TestCase
 {
     public function testConstruct()
     {

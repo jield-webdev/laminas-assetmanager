@@ -1,6 +1,6 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use Assetic\Asset;
 use Assetic\Asset\AssetCache;
@@ -10,13 +10,13 @@ use AssetManager\Resolver\CollectionResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CollectionsResolverTest extends PHPUnit_Framework_TestCase
+class CollectionResolverTest extends TestCase
 {
     public function getResolverMock()
     {
-        $resolver = $this->getMock(ResolverInterface::class);
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $resolver
             ->expects($this->once())
             ->method('resolve')
@@ -194,7 +194,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testCouldNotResolve()
     {
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->once())
             ->method('resolve')
@@ -215,7 +215,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testResolvesToNonAsset()
     {
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->once())
             ->method('resolve')
@@ -252,13 +252,13 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             return $$assetName;
         };
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->exactly(2))
             ->method('resolve')
             ->will($this->returnCallback($callback));
 
-        $assetFilterManager = $this->getMock(AssetFilterManager::class);
+        $assetFilterManager = $this->getMockBuilder(AssetFilterManager::class)->getMock();
         $assetFilterManager
             ->expects($this->once())
             ->method('setFilters')
@@ -280,9 +280,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
     public function testTwoCollectionsHasDifferentCacheKey()
     {
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
 
-        //assets with same 'last modifled time'.
+        //assets with same 'last modified time'.
         $now = time();
         $bacon =  new Asset\StringAsset('bacon');
         $bacon->setLastModified($now);
@@ -321,7 +321,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $collection1 = $resolver->resolve('collection1');
         $collection2 = $resolver->resolve('collection2');
 
-        $cacheInterface = $this->getMock(CacheInterface::class);
+        $cacheInterface = $this->getMockBuilder(CacheInterface::class)->getMock();
 
         $cacheKeys = new \ArrayObject();
         $callback = function ($key) use ($cacheKeys) {
@@ -367,7 +367,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             return $$assetName;
         };
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->exactly(3))
             ->method('resolve')

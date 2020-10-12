@@ -1,6 +1,6 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use ArrayObject;
 use Assetic\Asset;
@@ -9,9 +9,9 @@ use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\PathStackResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PathStackResolverTest extends PHPUnit_Framework_TestCase
+class PathStackResolverTest extends TestCase
 {
     public function testConstructor()
     {

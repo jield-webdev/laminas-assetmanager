@@ -9,7 +9,7 @@ use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetManager;
 use AssetManager\Service\MimeResolver;
 use JSMin;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Laminas\Console\Adapter\AdapterInterface;
 use Laminas\Console\Request as ConsoleRequest;
 use Laminas\Mvc\Console\Router\RouteMatch;
@@ -18,7 +18,7 @@ use Laminas\Mvc\Router\RouteMatch as V2RouteMatch;
 use Laminas\ServiceManager\ServiceLocatorInterface;
 use Laminas\View\Resolver\ResolverInterface;
 
-class ConsoleControllerTest extends PHPUnit_Framework_TestCase
+class ConsoleControllerTest extends TestCase
 {
     /**
      *
@@ -30,12 +30,12 @@ class ConsoleControllerTest extends PHPUnit_Framework_TestCase
     protected $event;
     protected static $assetName;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$assetName = '_assettest.' . time();
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/JSMin.inc';
 

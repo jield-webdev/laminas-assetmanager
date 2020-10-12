@@ -1,16 +1,16 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use Assetic\Asset;
 use AssetManager\Resolver\AliasPathStackResolver;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit Tests for the Alias Path Stack Resolver
  */
-class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
+class AliasPathStackResolverTest extends TestCase
 {
     /**
      * Test constructor passes
@@ -250,7 +250,7 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
         $fileAsset           = new Asset\FileAsset(__FILE__);
         $fileAsset->mimetype = $mimeResolver->getMimeType(__FILE__);
         $this->assertEquals($fileAsset, $resolver->resolve('AliasPathStackResolverTest/' . basename(__FILE__)));
-        
+
         $map = array(
             'AliasPathStackResolverTest/' => __DIR__,
             'prefix/AliasPathStackResolverTest/' =>  __DIR__

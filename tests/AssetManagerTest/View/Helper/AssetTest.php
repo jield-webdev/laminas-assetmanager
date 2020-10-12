@@ -6,7 +6,7 @@ use AssetManager\Resolver\MapResolver;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Service\MimeResolver;
 use AssetManager\View\Helper\Asset;
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 
 class AssetTest extends TestCase
 {
@@ -61,13 +61,13 @@ class AssetTest extends TestCase
         $newFilenameWithCache = $helperWithCache->__invoke($filename);
 
         // with cache file should have a timestamp query param
-        $this->assertContains('?_=', $newFilenameWithCache);
+        $this->assertStringContainsString('?_=', $newFilenameWithCache);
 
         $helperWithoutCache = new Asset($resolver, null, $configWithoutCache);
         $newFilenameWithoutCache = $helperWithoutCache->__invoke($filename);
 
         // without cache file should have a timestamp query param
-        $this->assertContains('?_=', $newFilenameWithoutCache);
+        $this->assertStringContainsString('?_=', $newFilenameWithoutCache);
 
         // without cache the timestamp query param should be different than with cache
         $this->assertNotSame($newFilenameWithCache, $newFilenameWithoutCache);
@@ -94,7 +94,7 @@ class AssetTest extends TestCase
         $helper = new Asset($resolver, null, $config);
         $newFilename = $helper->__invoke($filename);
 
-        $this->assertContains('?_=', $newFilename);
+        $this->assertStringContainsString('?_=', $newFilename);
         $this->assertNotSame($newFilename, $filename);
     }
 
@@ -119,7 +119,7 @@ class AssetTest extends TestCase
         $helper = new Asset($resolver, null, $config);
         $newFilename = $helper->__invoke($filename);
 
-        $this->assertNotContains('?_=', $newFilename);
+        $this->assertStringNotContainsString('?_=', $newFilename);
         $this->assertSame($newFilename, $filename);
     }
 }

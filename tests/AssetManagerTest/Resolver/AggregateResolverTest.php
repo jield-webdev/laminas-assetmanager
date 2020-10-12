@@ -1,12 +1,12 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use AssetManager\Resolver\AggregateResolver;
 use AssetManager\Resolver\ResolverInterface;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class AggregateResolverTest extends PHPUnit_Framework_TestCase
+class AggregateResolverTest extends TestCase
 {
     public function testResolve()
     {

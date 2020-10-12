@@ -8,10 +8,10 @@ use AssetManager\Service\AssetCacheManager;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetManager;
 use AssetManager\Service\AssetManagerServiceFactory;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Laminas\ServiceManager\ServiceManager;
 
-class AssetManagerServiceFactoryTest extends PHPUnit_Framework_TestCase
+class AssetManagerServiceFactoryTest extends TestCase
 {
     public function testCreateService()
     {

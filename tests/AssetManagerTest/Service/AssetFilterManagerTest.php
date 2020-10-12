@@ -5,16 +5,18 @@ namespace AssetManagerTest\Service;
 use Assetic\Asset\AssetInterface;
 use Assetic\Asset\StringAsset;
 use Assetic\Filter\FilterInterface;
+use AssetManager\Exception\RuntimeException;
 use AssetManager\Service\AssetFilterManager;
-use PHPUnit_Framework_TestCase;
+use CustomFilter;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
-class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
+class AssetFilterManagerTest extends TestCase
 {
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/CustomFilter.php';
     }
@@ -22,9 +24,9 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
     public function testNulledValuesAreSkipped()
     {
         $assetFilterManager = new AssetFilterManager(array(
-        'test/path.test' => array(
-            'null_filters' => null
-        )
+            'test/path.test' => array(
+                'null_filters' => null
+            )
         ));
 
         $asset = new StringAsset('Herp Derp');
@@ -34,7 +36,7 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('Herp Derp', $asset->dump());
     }
 
-    public function testensureByService()
+    public function testEnsureByService()
     {
         $assetFilterManager = new AssetFilterManager(array(
             'test/path.test' => array(
@@ -45,7 +47,7 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
         ));
 
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('testFilter', new \CustomFilter());
+        $serviceManager->setService('testFilter', new CustomFilter());
         $assetFilterManager->setServiceLocator($serviceManager);
 
         $asset = new StringAsset('Herp derp');
@@ -55,11 +57,9 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('called', $asset->dump());
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
-    public function testensureByServiceInvalid()
+    public function testEnsureByServiceInvalid()
     {
+        $this->expectException(RuntimeException::class);
         $assetFilterManager = new AssetFilterManager(array(
             'test/path.test' => array(
                 array(
@@ -69,7 +69,7 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
         ));
 
         $serviceManager = new ServiceManager();
-        $serviceManager->setService('testFilter', new \CustomFilter());
+        $serviceManager->setService('testFilter', new CustomFilter());
         $assetFilterManager->setServiceLocator($serviceManager);
 
         $asset = new StringAsset('Herp derp');
@@ -79,15 +79,12 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('called', $asset->dump());
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
-    public function testensureByInvalid()
+    public function testEnsureByInvalid()
     {
+        $this->expectException(RuntimeException::class);
         $assetFilterManager = new AssetFilterManager(array(
             'test/path.test' => array(
-                array(
-                ),
+                array(),
             ),
         ));
 
@@ -95,7 +92,7 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
 
         $assetFilterManager->setFilters('test/path.test', $asset);
     }
-    
+
     public function testFiltersAreInstantiatedOnce()
     {
         $assetFilterManager = new AssetFilterManager(array(
@@ -105,10 +102,10 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         ));
-        
+
         $filterInstance = null;
-        
-        $asset = $this->getMock(AssetInterface::class);
+
+        $asset = $this->getMockBuilder(AssetInterface::class)->getMock();
         $asset
             ->expects($this->any())
             ->method('ensureFilter')
@@ -116,9 +113,9 @@ class AssetFilterManagerTest extends PHPUnit_Framework_TestCase
                 if ($filterInstance === null) {
                     $filterInstance = $filter;
                 }
-                return  $filter === $filterInstance;
+                self::assertEquals($filter, $filterInstance);
             }));
-        
+
         $assetFilterManager->setFilters('test/path.test', $asset);
         $assetFilterManager->setFilters('test/path.test', $asset);
     }

@@ -4,13 +4,14 @@ namespace AssetManagerTest\Cache;
 
 use AssetManager\Cache\LaminasCacheAdapter;
 use Laminas\Cache\Storage\Adapter\Memory;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test file for Laminas Cache Adapter
  *
  * @package AssetManager\Cache
  */
-class LaminasCacheAdapterTest extends \PHPUnit_Framework_TestCase
+class LaminasCacheAdapterTest extends TestCase
 {
     public function testConstructor()
     {
