@@ -2,12 +2,15 @@
 
 namespace AssetManagerTest\Service;
 
+use AssetManager\Exception\RuntimeException;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AggregateResolverServiceFactory;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit\Framework\TestCase;
+use InterfaceTestResolver;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class AggregateResolverServiceFactoryTest extends TestCase
 {
@@ -45,7 +48,9 @@ class AggregateResolverServiceFactoryTest extends TestCase
             )
         );
 
-        $mockedResolver = $this->getMock(ResolverInterface::class);
+        $mockedResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $mockedResolver
             ->expects($this->once())
             ->method('resolve')
@@ -60,11 +65,9 @@ class AggregateResolverServiceFactoryTest extends TestCase
         $this->assertSame('test-resolved-path', $resolver->resolve('test-path'));
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testInvalidCustomResolverFails()
     {
+        $this->expectException(RuntimeException::class);
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             'config',
@@ -78,7 +81,7 @@ class AggregateResolverServiceFactoryTest extends TestCase
         );
         $serviceManager->setService(
             'My\Resolver',
-            new \stdClass
+            new stdClass
         );
 
         $factory = new AggregateResolverServiceFactory();
@@ -100,7 +103,9 @@ class AggregateResolverServiceFactoryTest extends TestCase
             )
         );
 
-        $mockedResolver1 = $this->getMock(ResolverInterface::class);
+        $mockedResolver1 = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $mockedResolver1
             ->expects($this->once())
             ->method('resolve')
@@ -109,7 +114,9 @@ class AggregateResolverServiceFactoryTest extends TestCase
         $serviceManager->setService('AssetManager\Service\MimeResolver', new MimeResolver);
         $serviceManager->setService('mocked_resolver_1', $mockedResolver1);
 
-        $mockedResolver2 = $this->getMock(ResolverInterface::class);
+        $mockedResolver2 = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $mockedResolver2
             ->expects($this->never())
             ->method('resolve');
@@ -136,7 +143,9 @@ class AggregateResolverServiceFactoryTest extends TestCase
             )
         );
 
-        $mockedResolver1 = $this->getMock(ResolverInterface::class);
+        $mockedResolver1 = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $mockedResolver1
             ->expects($this->once())
             ->method('resolve')
@@ -145,7 +154,9 @@ class AggregateResolverServiceFactoryTest extends TestCase
         $serviceManager->setService('mocked_resolver_1', $mockedResolver1);
         $serviceManager->setService('AssetManager\Service\MimeResolver', new MimeResolver);
 
-        $mockedResolver2 = $this->getMock(ResolverInterface::class);
+        $mockedResolver2 = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $mockedResolver2
             ->expects($this->once())
             ->method('resolve')
@@ -173,7 +184,7 @@ class AggregateResolverServiceFactoryTest extends TestCase
             )
         );
 
-        $interfaceTestResolver = new \InterfaceTestResolver;
+        $interfaceTestResolver = new InterfaceTestResolver;
 
         $serviceManager->setService(MimeResolver::class, new MimeResolver);
         $serviceManager->setService('mocked_resolver', $interfaceTestResolver);

@@ -3,10 +3,13 @@
 namespace AssetManagerTest\Resolver;
 
 use Assetic\Asset;
+use AssetManager\Exception\InvalidArgumentException;
 use AssetManager\Resolver\MapResolver;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Service\MimeResolver;
+use AssetManagerTest\Service\MapIterable;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class MapResolverTest extends TestCase
 {
@@ -37,7 +40,7 @@ class MapResolverTest extends TestCase
     public function testSetMapSuccess()
     {
         $resolver = new MapResolver;
-        $resolver->setMap(new MapIterable);
+        $resolver->setMap(new MapIterable());
 
         $this->assertEquals(
             array(
@@ -64,13 +67,12 @@ class MapResolverTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\InvalidArgumentException
-     */
     public function testSetMapFails()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $resolver = new MapResolver;
-        $resolver->setMap(new \stdClass);
+        $resolver->setMap(new stdClass);
     }
 
     public function testGetMap()
@@ -112,8 +114,8 @@ class MapResolverTest extends TestCase
 
         $resolver->setMap($asset1);
 
-        $asset      = $resolver->resolve('bacon');
-        $mimetype   = $mimeResolver->getMimeType(__FILE__);
+        $asset = $resolver->resolve('bacon');
+        $mimetype = $mimeResolver->getMimeType(__FILE__);
 
         $this->assertTrue($asset instanceof Asset\FileAsset);
         $this->assertEquals($mimetype, $asset->mimetype);
@@ -122,13 +124,15 @@ class MapResolverTest extends TestCase
 
     public function testResolveHttpAssetSuccess()
     {
-        $resolver     = new MapResolver;
-        $mimeResolver = $this->getMock(MimeResolver::class);
+        $resolver = new MapResolver;
+        $mimeResolver = $this
+            ->getMockBuilder(MimeResolver::class)
+            ->getMock();
 
         $mimeResolver->expects($this->any())
-                ->method('getMimeType')
-                ->with('http://foo.bar/')
-                ->will($this->returnValue('text/foo'));
+            ->method('getMimeType')
+            ->with('http://foo.bar/')
+            ->will($this->returnValue('text/foo'));
 
         $resolver->setMimeResolver($mimeResolver);
 
@@ -138,7 +142,7 @@ class MapResolverTest extends TestCase
 
         $resolver->setMap($asset1);
 
-        $asset      = $resolver->resolve('bacon');
+        $asset = $resolver->resolve('bacon');
 
         $this->assertTrue($asset instanceof Asset\HttpAsset);
         $this->assertSame('text/foo', $asset->mimetype);
