@@ -69,7 +69,7 @@ class PrioritizedPathsResolverTest extends TestCase
             $fetched
         );
 
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->setPaths('invalid');
     }
 
@@ -137,7 +137,7 @@ class PrioritizedPathsResolverTest extends TestCase
         ));
 
         $resolver->addPath('dir4');
-        $resolver->addPath(array('path'=>'dir5', 'priority'=>-5));
+        $resolver->addPath(array('path' => 'dir5', 'priority' => -5));
 
         $fetched = array();
 
@@ -174,7 +174,7 @@ class PrioritizedPathsResolverTest extends TestCase
     public function testWillValidateGivenPathArray()
     {
         $resolver = new PrioritizedPathsResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(array('invalid'));
     }
 
@@ -221,7 +221,7 @@ class PrioritizedPathsResolverTest extends TestCase
     public function testWillRefuseInvalidPath()
     {
         $resolver = new PrioritizedPathsResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(null);
     }
 

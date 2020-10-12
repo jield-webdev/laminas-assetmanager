@@ -14,7 +14,9 @@ class AggregateResolverTest extends TestCase
 
         $this->assertTrue($resolver instanceof ResolverInterface);
 
-        $lowPriority = $this->getMock(ResolverInterface::class);
+        $lowPriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $lowPriority
             ->expects($this->once())
             ->method('resolve')
@@ -24,7 +26,9 @@ class AggregateResolverTest extends TestCase
 
         $this->assertSame('first', $resolver->resolve('to-be-resolved'));
 
-        $highPriority = $this->getMock(ResolverInterface::class);
+        $highPriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $highPriority
             ->expects($this->exactly(2))
             ->method('resolve')
@@ -34,7 +38,9 @@ class AggregateResolverTest extends TestCase
 
         $this->assertSame('second', $resolver->resolve('to-be-resolved'));
 
-        $averagePriority = $this->getMock(ResolverInterface::class);
+        $averagePriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $averagePriority
             ->expects($this->never())
             ->method('resolve')
@@ -46,8 +52,12 @@ class AggregateResolverTest extends TestCase
 
     public function testCollectWithCollectMethod()
     {
-        $resolver    = new AggregateResolver();
-        $lowPriority = $this->getMock(ResolverInterface::class, array('resolve', 'collect'));
+        $resolver = new AggregateResolver();
+        $lowPriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->onlyMethods(array('resolve'))
+            ->addMethods(array('collect'))
+            ->getMock();
         $lowPriority
             ->expects($this->exactly(2))
             ->method('collect')
@@ -56,7 +66,11 @@ class AggregateResolverTest extends TestCase
 
         $this->assertContains('one', $resolver->collect());
 
-        $highPriority = $this->getMock(ResolverInterface::class, array('resolve', 'collect'));
+        $highPriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->onlyMethods(array('resolve'))
+            ->addMethods(array('collect'))
+            ->getMock();
         $highPriority
             ->expects($this->once())
             ->method('collect')
@@ -72,14 +86,18 @@ class AggregateResolverTest extends TestCase
 
     public function testCollectWithoutCollectMethod()
     {
-        $resolver    = new AggregateResolver();
-        $lowPriority = $this->getMock(ResolverInterface::class);
+        $resolver = new AggregateResolver();
+        $lowPriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
 
         $resolver->attach($lowPriority);
 
         $this->assertEquals(array(), $resolver->collect());
 
-        $highPriority = $this->getMock(ResolverInterface::class);
+        $highPriority = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $resolver->attach($highPriority, 1000);
 
         $collection = $resolver->collect();

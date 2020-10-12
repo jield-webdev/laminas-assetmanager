@@ -10,6 +10,9 @@ use AssetManager\Resolver\PathStackResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_Error;
+use stdClass;
+use TypeError;
 
 class PathStackResolverTest extends TestCase
 {
@@ -33,27 +36,17 @@ class PathStackResolverTest extends TestCase
         $this->assertEquals($mimeResolver, $resolver->getMimeResolver());
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testSetMimeResolverFailObject()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         $resolver = new PathStackResolver();
-        $resolver->setMimeResolver(new \stdClass());
+        $resolver->setMimeResolver(new stdClass());
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testSetMimeResolverFailString()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         $resolver = new PathStackResolver();
         $resolver->setMimeResolver('invalid');
@@ -79,7 +72,7 @@ class PathStackResolverTest extends TestCase
             $resolver->getPaths()->toArray()
         );
 
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->setPaths('invalid');
 
     }
@@ -136,7 +129,7 @@ class PathStackResolverTest extends TestCase
     public function testWillRefuseInvalidPath()
     {
         $resolver = new PathStackResolver();
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $resolver->addPath(null);
     }
 

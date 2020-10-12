@@ -8,8 +8,8 @@ use AssetManager\Service\AssetCacheManager;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetManager;
 use AssetManager\Service\AssetManagerServiceFactory;
-use PHPUnit\Framework\TestCase;
 use Laminas\ServiceManager\ServiceManager;
+use PHPUnit\Framework\TestCase;
 
 class AssetManagerServiceFactoryTest extends TestCase
 {
@@ -23,7 +23,9 @@ class AssetManagerServiceFactoryTest extends TestCase
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
             AggregateResolver::class,
-            $this->getMock(ResolverInterface::class)
+            $this
+                ->getMockBuilder(ResolverInterface::class)
+                ->getMock()
         );
 
         $serviceManager->setService(
@@ -37,11 +39,11 @@ class AssetManagerServiceFactoryTest extends TestCase
         );
 
         $serviceManager->setService('config', array(
-                'asset_manager' => array(
-                    'Dummy data',
-                    'Bacon',
-                ),
-            ));
+            'asset_manager' => array(
+                'Dummy data',
+                'Bacon',
+            ),
+        ));
 
         $factory = new AssetManagerServiceFactory();
         $this->assertInstanceOf(AssetManager::class, $factory->createService($serviceManager));

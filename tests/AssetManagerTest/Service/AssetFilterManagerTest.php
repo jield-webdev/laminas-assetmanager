@@ -114,6 +114,7 @@ class AssetFilterManagerTest extends TestCase
                     $filterInstance = $filter;
                 }
                 self::assertEquals($filter, $filterInstance);
+                return $filter === $filterInstance;
             }));
 
         $assetFilterManager->setFilters('test/path.test', $asset);

@@ -80,11 +80,12 @@ class AssetManagerTest extends TestCase
 
     public function testConstruct()
     {
-        $resolver = $this->getMock(ResolverInterface::class);
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver, array('herp', 'derp'));
 
         $this->assertSame($resolver, $assetManager->getResolver());
-        $this->assertAttributeEquals(array('herp', 'derp'), 'config', $assetManager);
     }
 
     public function testConstructFailsOnOtherType()
@@ -147,9 +148,14 @@ class AssetManagerTest extends TestCase
 
     public function testSetResolver()
     {
-        $assetManager = new AssetManager($this->getMock(ResolverInterface::class));
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
+        $assetManager = new AssetManager($resolver);
 
-        $newResolver = $this->getMock(ResolverInterface::class);
+        $newResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager->setResolver($newResolver);
 
         $this->assertSame($newResolver, $assetManager->getResolver());
@@ -168,7 +174,9 @@ class AssetManagerTest extends TestCase
 
     public function testGetResolver()
     {
-        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver);
 
         $this->assertSame($resolver, $assetManager->getResolver());
@@ -457,7 +465,9 @@ class AssetManagerTest extends TestCase
     public function testSetAssetOnReponseFailsWhenNotResolved()
     {
         $this->expectException(RuntimeException::class);
-        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver);
 
         $assetManager->setAssetOnResponse(new Response);
@@ -465,7 +475,9 @@ class AssetManagerTest extends TestCase
 
     public function testResolvesToAssetNotFound()
     {
-        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $assetManager = new AssetManager($resolver);
         $resolvesToAsset = $assetManager->resolvesToAsset(new Request);
 
@@ -512,7 +524,8 @@ class AssetManagerTest extends TestCase
      */
     protected function getAssetCacheManagerMock()
     {
-        $assetCacheManager = $this->getMockBuilder(AssetCacheManager::class)
+        $assetCacheManager = $this
+            ->getMockBuilder(AssetCacheManager::class)
             ->disableOriginalConstructor()
             ->getMock();
 

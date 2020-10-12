@@ -3,8 +3,10 @@
 namespace AssetManagerTest\Cache;
 
 use AssetManager\Cache\LaminasCacheAdapter;
+use DateTime;
 use Laminas\Cache\Storage\Adapter\Memory;
 use PHPUnit\Framework\TestCase;
+use TypeError;
 
 /**
  * Test file for Laminas Cache Adapter
@@ -24,16 +26,11 @@ class LaminasCacheAdapterTest extends TestCase
         $this->assertInstanceOf(LaminasCacheAdapter::class, $adapter);
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testConstructorOnlyAcceptsALaminasCacheStorageInterface()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
-        new LaminasCacheAdapter(new \DateTime());
+        new LaminasCacheAdapter(new DateTime());
     }
 
     public function testHasMethodCallsLaminasCacheHasItem()
