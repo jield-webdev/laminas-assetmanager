@@ -5,9 +5,9 @@ namespace AssetManager\Resolver;
 use Assetic\Asset\FileAsset;
 use Assetic\Factory\Resource\DirectoryResource;
 use AssetManager\Exception;
+use AssetManager\Exception\RuntimeException;
 use AssetManager\Service\MimeResolver;
 use SplFileInfo;
-use Laminas\Db\TableGateway\Exception\RuntimeException;
 use Laminas\Stdlib\SplStack;
 
 /**
@@ -16,7 +16,7 @@ use Laminas\Stdlib\SplStack;
 class AliasPathStackResolver implements ResolverInterface, MimeResolverAwareInterface
 {
     /**
-     * @var Array
+     * @var array
      */
     protected $aliases = array();
 
@@ -42,7 +42,7 @@ class AliasPathStackResolver implements ResolverInterface, MimeResolverAwareInte
      * @param  array                              $aliases
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(Array $aliases)
+    public function __construct(array $aliases)
     {
         foreach ($aliases as $alias => $path) {
             $this->addAlias($alias, $path);
