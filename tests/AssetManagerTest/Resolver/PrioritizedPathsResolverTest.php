@@ -168,7 +168,6 @@ class PrioritizedPathsResolverTest extends TestCase
         $this->assertContains('dir1' . DIRECTORY_SEPARATOR, $paths);
         $this->assertContains('dir2' . DIRECTORY_SEPARATOR, $paths);
         $this->assertContains('dir3' . DIRECTORY_SEPARATOR, $paths);
-
     }
 
     public function testWillValidateGivenPathArray()

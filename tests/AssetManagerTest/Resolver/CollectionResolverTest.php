@@ -181,7 +181,6 @@ class CollectionResolverTest extends TestCase
         ));
 
         $resolver->resolve('bacon');
-
     }
 
     public function testCouldNotResolve()

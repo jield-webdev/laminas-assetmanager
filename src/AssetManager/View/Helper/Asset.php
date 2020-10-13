@@ -57,7 +57,6 @@ class Asset extends AbstractHelper
     {
         $asset = $this->assetManagerResolver->resolve($filename);
         if ($asset !== null) {
-
             // append last modified date to the filepath and use a custom query string
             return $this->appendTimestamp($filename, $queryString, $asset->getLastModified());
         }
@@ -106,7 +105,7 @@ class Asset extends AbstractHelper
         if (empty($this->config['view_helper']['append_timestamp'])) {
             return $filename;
         }
-        
+
         // search the cache config for the specific file requested (if none, use the default one)
         if (isset($this->config['caching'][$filename])) {
             $cacheConfig = $this->config['caching'][$filename];
@@ -121,7 +120,6 @@ class Asset extends AbstractHelper
 
         // no cache dir is defined
         if (!isset($cacheConfig['options']['dir'])) {
-
             // append current timestamp to the filepath and use a custom query string
             return $this->appendTimestamp($filename, $queryString);
         }

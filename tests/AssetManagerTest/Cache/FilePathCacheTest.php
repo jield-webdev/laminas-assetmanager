@@ -68,7 +68,6 @@ class FilePathCacheTest extends TestCase
         $cache = new FilePathCache($base . 'readonly', 'bacon.' . $time . '.hammertime');
 
         $cache->set('bacon', $sentence);
-
     }
 
     public function testSetCanNotWriteToFileThatExists()

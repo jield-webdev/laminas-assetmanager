@@ -36,7 +36,6 @@ class ModuleServiceManagerConfigTest extends TestCase
 
             $this->assertTrue(is_object($service));
         }
-
     }
 
     /**
