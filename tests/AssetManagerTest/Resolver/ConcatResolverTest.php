@@ -1,28 +1,32 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
-use Assetic\Asset;
+use Assetic\Asset\FileAsset;
 use AssetManager\Asset\AggregateAsset;
 use AssetManager\Resolver\AggregateResolverAwareInterface;
 use AssetManager\Resolver\ConcatResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use AssetManagerTest\Service\ConcatIterable;
+use Laminas\Stdlib\Exception\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use stdClass;
+use TypeError;
 
-class ConcatResolverTest extends PHPUnit_Framework_TestCase
+class ConcatResolverTest extends TestCase
 {
     public function testConstruct()
     {
         $resolver = new ConcatResolver(
             array(
-                 'key1' => array(
-                     __FILE__
-                 ),
-                 'key2' => array(
-                     __FILE__
-                 ),
+                'key1' => array(
+                    __FILE__
+                ),
+                'key2' => array(
+                    __FILE__
+                ),
             )
         );
 
@@ -31,12 +35,12 @@ class ConcatResolverTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(
             array(
-                 'key1' => array(
-                     __FILE__
-                 ),
-                 'key2' => array(
-                     __FILE__
-                 ),
+                'key1' => array(
+                    __FILE__
+                ),
+                'key2' => array(
+                    __FILE__
+                ),
             ),
             $resolver->getConcats()
         );
@@ -46,7 +50,9 @@ class ConcatResolverTest extends PHPUnit_Framework_TestCase
     {
         $resolver = new ConcatResolver;
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $aggregateResolver
             ->expects($this->once())
             ->method('resolve')
@@ -58,58 +64,51 @@ class ConcatResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('world', $resolver->getAggregateResolver()->resolve('say'));
     }
 
-    /**
-     * @expectedException PHPUnit_Framework_Error
-     */
     public function testSetAggregateResolverFails()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         $resolver = new ConcatResolver;
 
-        $resolver->setAggregateResolver(new \stdClass);
+        $resolver->setAggregateResolver(new stdClass);
     }
 
     public function testSetConcatSuccess()
     {
         $resolver = new ConcatResolver;
 
-        $resolver->setConcats(new ConcatIterable);
+        $resolver->setConcats(new ConcatIterable());
 
         $this->assertEquals(
             array(
-                 'mapName1' => array(
-                     'map 1.1',
-                     'map 1.2',
-                     'map 1.3',
-                     'map 1.4',
-                 ),
-                 'mapName2' => array(
-                     'map 2.1',
-                     'map 2.2',
-                     'map 2.3',
-                     'map 2.4',
-                 ),
-                 'mapName3' => array(
-                     'map 3.1',
-                     'map 3.2',
-                     'map 3.3',
-                     'map 3.4',
-                 )
+                'mapName1' => array(
+                    'map 1.1',
+                    'map 1.2',
+                    'map 1.3',
+                    'map 1.4',
+                ),
+                'mapName2' => array(
+                    'map 2.1',
+                    'map 2.2',
+                    'map 2.3',
+                    'map 2.4',
+                ),
+                'mapName3' => array(
+                    'map 3.1',
+                    'map 3.2',
+                    'map 3.3',
+                    'map 3.4',
+                )
             ),
             $resolver->getConcats()
         );
     }
 
-    /**
-     * @expectedException \Laminas\Stdlib\Exception\InvalidArgumentException
-     */
     public function testSetConcatFails()
     {
+        $this->expectException(InvalidArgumentException::class);
         $resolver = new ConcatResolver;
-        $resolver->setConcats(new \stdClass);
+        $resolver->setConcats(new stdClass());
     }
 
     public function testGetConcat()
@@ -147,14 +146,16 @@ class ConcatResolverTest extends PHPUnit_Framework_TestCase
         );
 
         $callback = function ($file) {
-            $asset = new \Assetic\Asset\FileAsset(
+            $asset = new FileAsset(
                 $file
             );
 
             return $asset;
         };
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $aggregateResolver
             ->expects($this->exactly(2))
             ->method('resolve')
@@ -169,12 +170,12 @@ class ConcatResolverTest extends PHPUnit_Framework_TestCase
 
         $resolver->setConcats($asset1);
 
-        $asset      = $resolver->resolve('bacon');
+        $asset = $resolver->resolve('bacon');
 
         $this->assertTrue($asset instanceof AggregateAsset);
         $this->assertEquals(
             $asset->dump(),
-            file_get_contents(__FILE__).file_get_contents(__FILE__)
+            file_get_contents(__FILE__) . file_get_contents(__FILE__)
         );
     }
 

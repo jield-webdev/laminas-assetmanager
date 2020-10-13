@@ -1,16 +1,21 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
 use Assetic\Asset;
+use AssetManager\Exception\InvalidArgumentException;
 use AssetManager\Resolver\AliasPathStackResolver;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_Error;
+use ReflectionClass;
+use stdClass;
+use TypeError;
 
 /**
  * Unit Tests for the Alias Path Stack Resolver
  */
-class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
+class AliasPathStackResolverTest extends TestCase
 {
     /**
      * Test constructor passes
@@ -25,8 +30,8 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
 
         $resolver = new AliasPathStackResolver($aliases);
 
-        $reflectionClass = new \ReflectionClass(\AssetManager\Resolver\AliasPathStackResolver::class);
-        $property        = $reflectionClass->getProperty('aliases');
+        $reflectionClass = new ReflectionClass(AliasPathStackResolver::class);
+        $property = $reflectionClass->getProperty('aliases');
         $property->setAccessible(true);
 
         $this->assertEquals(
@@ -39,13 +44,10 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      * Test constructor fails when aliases passed in is not an array
      *
      * @covers \AssetManager\Resolver\AliasPathStackResolver::__construct
-     * @expectedException PHPUnit_Framework_Error
      */
     public function testConstructorFail()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         new AliasPathStackResolver('this_should_fail');
     }
@@ -57,9 +59,9 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testAddAlias()
     {
-        $resolver        = new AliasPathStackResolver(array());
-        $reflectionClass = new \ReflectionClass(\AssetManager\Resolver\AliasPathStackResolver::class);
-        $addAlias        = $reflectionClass->getMethod('addAlias');
+        $resolver = new AliasPathStackResolver(array());
+        $reflectionClass = new ReflectionClass(AliasPathStackResolver::class);
+        $addAlias = $reflectionClass->getMethod('addAlias');
 
         $addAlias->setAccessible(true);
 
@@ -79,13 +81,13 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      * Test addAlias fails with bad key
      *
      * @covers \AssetManager\Resolver\AliasPathStackResolver::addAlias
-     * @expectedException \AssetManager\Exception\InvalidArgumentException
      */
     public function testAddAliasFailsWithBadKey()
     {
-        $resolver        = new AliasPathStackResolver(array());
-        $reflectionClass = new \ReflectionClass(\AssetManager\Resolver\AliasPathStackResolver::class);
-        $addAlias        = $reflectionClass->getMethod('addAlias');
+        $this->expectException(InvalidArgumentException::class);
+        $resolver = new AliasPathStackResolver(array());
+        $reflectionClass = new ReflectionClass(AliasPathStackResolver::class);
+        $addAlias = $reflectionClass->getMethod('addAlias');
 
         $addAlias->setAccessible(true);
 
@@ -99,13 +101,13 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      * Test addAlias fails with bad Path
      *
      * @covers \AssetManager\Resolver\AliasPathStackResolver::addAlias
-     * @expectedException \AssetManager\Exception\InvalidArgumentException
      */
     public function testAddAliasFailsWithBadPath()
     {
+        $this->expectException(InvalidArgumentException::class);
         $resolver = new AliasPathStackResolver(array());
 
-        $reflectionClass = new \ReflectionClass(\AssetManager\Resolver\AliasPathStackResolver::class);
+        $reflectionClass = new ReflectionClass(AliasPathStackResolver::class);
 
         $addAlias = $reflectionClass->getMethod('addAlias');
         $addAlias->setAccessible(true);
@@ -123,9 +125,9 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testNormalizePath()
     {
-        $resolver        = new AliasPathStackResolver(array());
-        $reflectionClass = new \ReflectionClass(\AssetManager\Resolver\AliasPathStackResolver::class);
-        $addAlias        = $reflectionClass->getMethod('normalizePath');
+        $resolver = new AliasPathStackResolver(array());
+        $reflectionClass = new ReflectionClass(AliasPathStackResolver::class);
+        $addAlias = $reflectionClass->getMethod('normalizePath');
 
         $addAlias->setAccessible(true);
 
@@ -162,16 +164,13 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      * Test Set Mime Resolver Only Accepts a mime Resolver
      *
      * @covers \AssetManager\Resolver\AliasPathStackResolver::setMimeResolver
-     * @expectedException \PHPUnit_Framework_Error
      */
     public function testSetMimeResolverFailObject()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         $resolver = new AliasPathStackResolver(array('my/alias/' => __DIR__));
-        $resolver->setMimeResolver(new \stdClass());
+        $resolver->setMimeResolver(new stdClass());
     }
 
     /**
@@ -218,7 +217,7 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($resolver instanceof AliasPathStackResolver);
         $mimeResolver = new MimeResolver();
         $resolver->setMimeResolver($mimeResolver);
-        $fileAsset           = new Asset\FileAsset(__FILE__);
+        $fileAsset = new Asset\FileAsset(__FILE__);
         $fileAsset->mimetype = $mimeResolver->getMimeType(__FILE__);
         $this->assertEquals($fileAsset, $resolver->resolve('my/alias/' . basename(__FILE__)));
         $this->assertNull($resolver->resolve('i-do-not-exist.php'));
@@ -234,7 +233,7 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
         $resolver = new AliasPathStackResolver(array('my/alias' => __DIR__));
         $mimeResolver = new MimeResolver();
         $resolver->setMimeResolver($mimeResolver);
-        $fileAsset           = new Asset\FileAsset(__FILE__);
+        $fileAsset = new Asset\FileAsset(__FILE__);
         $fileAsset->mimetype = $mimeResolver->getMimeType(__FILE__);
         $this->assertEquals($fileAsset, $resolver->resolve('my/alias/' . basename(__FILE__)));
     }
@@ -244,20 +243,20 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testResolveWhenAliasExistsInPath()
     {
-        $resolver     = new AliasPathStackResolver(array('AliasPathStackResolverTest/' => __DIR__));
+        $resolver = new AliasPathStackResolver(array('AliasPathStackResolverTest/' => __DIR__));
         $mimeResolver = new MimeResolver();
         $resolver->setMimeResolver($mimeResolver);
-        $fileAsset           = new Asset\FileAsset(__FILE__);
+        $fileAsset = new Asset\FileAsset(__FILE__);
         $fileAsset->mimetype = $mimeResolver->getMimeType(__FILE__);
         $this->assertEquals($fileAsset, $resolver->resolve('AliasPathStackResolverTest/' . basename(__FILE__)));
-        
+
         $map = array(
             'AliasPathStackResolverTest/' => __DIR__,
-            'prefix/AliasPathStackResolverTest/' =>  __DIR__
+            'prefix/AliasPathStackResolverTest/' => __DIR__
         );
         $resolver = new AliasPathStackResolver($map);
         $resolver->setMimeResolver(new MimeResolver());
-        $fileAsset           = new Asset\FileAsset(__FILE__);
+        $fileAsset = new Asset\FileAsset(__FILE__);
         $fileAsset->mimetype = $mimeResolver->getMimeType(__FILE__);
         $this->assertEquals($fileAsset, $resolver->resolve('prefix/AliasPathStackResolverTest/' . basename(__FILE__)));
     }
@@ -281,7 +280,7 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
     public function testLfiProtection()
     {
         $mimeResolver = new MimeResolver();
-        $resolver     = new AliasPathStackResolver(array('my/alias/' => __DIR__));
+        $resolver = new AliasPathStackResolver(array('my/alias/' => __DIR__));
         $resolver->setMimeResolver($mimeResolver);
 
         // should be on by default
@@ -308,7 +307,7 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testCollect()
     {
-        $alias    = 'my/alias/';
+        $alias = 'my/alias/';
         $resolver = new AliasPathStackResolver(array($alias => __DIR__));
 
         $this->assertContains($alias . basename(__FILE__), $resolver->collect());
@@ -322,9 +321,9 @@ class AliasPathStackResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testCollectDirectory()
     {
-        $alias    = 'my/alias/';
+        $alias = 'my/alias/';
         $resolver = new AliasPathStackResolver(array($alias => realpath(__DIR__ . '/../')));
-        $dir      = substr(__DIR__, strrpos(__DIR__, '/', 0) + 1);
+        $dir = substr(__DIR__, strrpos(__DIR__, '/', 0) + 1);
 
         $this->assertContains($alias . $dir . DIRECTORY_SEPARATOR . basename(__FILE__), $resolver->collect());
         $this->assertNotContains($alias . $dir . DIRECTORY_SEPARATOR . 'i-do-not-exist.php', $resolver->collect());

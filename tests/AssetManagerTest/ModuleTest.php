@@ -5,7 +5,6 @@ namespace AssetManagerTest;
 use AssetManager\Module;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetManager;
-use PHPUnit_Framework_TestCase;
 use Laminas\Console\Response as ConsoleResponse;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManager;
@@ -15,11 +14,12 @@ use Laminas\Http\Response;
 use Laminas\Mvc\ApplicationInterface;
 use Laminas\Mvc\MvcEvent;
 use Laminas\ServiceManager\ServiceLocatorInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
-* @covers AssetManager\Module
-*/
-class ModuleTest extends PHPUnit_Framework_TestCase
+ * @covers \AssetManager\Module
+ */
+class ModuleTest extends TestCase
 {
     use EventListenerIntrospectionTrait;
 
@@ -27,14 +27,14 @@ class ModuleTest extends PHPUnit_Framework_TestCase
     {
         $module = new Module();
         // just testing ZF specification requirements
-        $this->assertInternalType('array', $module->getAutoloaderConfig());
+        $this->assertIsArray($module->getAutoloaderConfig());
     }
 
     public function testGetConfig()
     {
         $module = new Module();
         // just testing ZF specification requirements
-        $this->assertInternalType('array', $module->getConfig());
+        $this->assertIsArray($module->getConfig());
     }
 
     /**
@@ -42,9 +42,9 @@ class ModuleTest extends PHPUnit_Framework_TestCase
      */
     public function testDispatchListenerIgnoresOtherResponseCodes()
     {
-        $event      = new MvcEvent();
-        $response   = new Response();
-        $module     = new Module();
+        $event = new MvcEvent();
+        $response = new Response();
+        $module = new Module();
 
         $response->setStatusCode(500);
         $event->setResponse($response);
@@ -56,33 +56,38 @@ class ModuleTest extends PHPUnit_Framework_TestCase
 
     public function testOnDispatchDoesntResolveToAsset()
     {
-        $resolver     = $this->getMock(ResolverInterface::class);
-        $assetManager = $this->getMock(
-            AssetManager::class,
-            array('resolvesToAsset'),
-            array($resolver)
-        );
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
+        $assetManager = $this->getMockBuilder(AssetManager::class)
+            ->onlyMethods(array('resolvesToAsset'))
+            ->setConstructorArgs(array($resolver))
+            ->getMock();
         $assetManager
             ->expects($this->once())
             ->method('resolvesToAsset')
             ->will($this->returnValue(false));
 
-        $serviceManager = $this->getMock(ServiceLocatorInterface::class);
+        $serviceManager = $this
+            ->getMockBuilder(ServiceLocatorInterface::class)
+            ->getMock();
         $serviceManager
             ->expects($this->any())
             ->method('get')
             ->will($this->returnValue($assetManager));
 
-        $application = $this->getMock(ApplicationInterface::class);
+        $application = $this
+            ->getMockBuilder(ApplicationInterface::class)
+            ->getMock();
         $application
             ->expects($this->once())
             ->method('getServiceManager')
             ->will($this->returnValue($serviceManager));
 
-        $event      = new MvcEvent();
-        $response   = new Response();
-        $request    = new Request();
-        $module     = new Module();
+        $event = new MvcEvent();
+        $response = new Response();
+        $request = new Request();
+        $module = new Module();
 
         $event->setApplication($application);
         $response->setStatusCode(404);
@@ -96,12 +101,14 @@ class ModuleTest extends PHPUnit_Framework_TestCase
 
     public function testOnDispatchStatus200()
     {
-        $resolver     = $this->getMock(ResolverInterface::class);
-        $assetManager = $this->getMock(
-            AssetManager::class,
-            array('resolvesToAsset', 'setAssetOnResponse'),
-            array($resolver)
-        );
+        $resolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
+        $assetManager = $this
+            ->getMockBuilder(AssetManager::class)
+            ->onlyMethods(array('resolvesToAsset', 'setAssetOnResponse'))
+            ->setConstructorArgs(array($resolver))
+            ->getMock();
         $assetManager
             ->expects($this->once())
             ->method('resolvesToAsset')
@@ -116,22 +123,26 @@ class ModuleTest extends PHPUnit_Framework_TestCase
             ->method('setAssetOnResponse')
             ->will($this->returnValue($amResponse));
 
-        $serviceManager = $this->getMock(ServiceLocatorInterface::class);
+        $serviceManager = $this
+            ->getMockBuilder(ServiceLocatorInterface::class)
+            ->getMock();
         $serviceManager
             ->expects($this->any())
             ->method('get')
             ->will($this->returnValue($assetManager));
 
-        $application = $this->getMock(ApplicationInterface::class);
+        $application = $this
+            ->getMockBuilder(ApplicationInterface::class)
+            ->getMock();
         $application
             ->expects($this->once())
             ->method('getServiceManager')
             ->will($this->returnValue($serviceManager));
 
-        $event      = new MvcEvent();
-        $response   = new Response();
-        $request    = new Request();
-        $module     = new Module();
+        $event = new MvcEvent();
+        $response = new Response();
+        $request = new Request();
+        $module = new Module();
 
         $event->setApplication($application);
         $response->setStatusCode(404);
@@ -148,11 +159,15 @@ class ModuleTest extends PHPUnit_Framework_TestCase
      */
     public function testWillIgnoreInvalidResponseType()
     {
-        $cliResponse = $this->getMock(ConsoleResponse::class, array(), array(), '', false);
-        $mvcEvent   = $this->getMock(MvcEvent::class);
-        $module     = new Module();
+        $cliResponse = $this->getMockBuilder(ConsoleResponse::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mvcEvent = $this
+            ->getMockBuilder(MvcEvent::class)
+            ->getMock();
+        $module = new Module();
 
-        $cliResponse->expects($this->never())->method('getStatusCode');
+        $cliResponse->expects($this->never())->method('setErrorLevel');
         $mvcEvent->expects($this->once())->method('getResponse')->will($this->returnValue($cliResponse));
 
         $this->assertNull($module->onDispatch($mvcEvent));
@@ -162,7 +177,9 @@ class ModuleTest extends PHPUnit_Framework_TestCase
     {
         $applicationEventManager = new EventManager();
 
-        $application = $this->getMock(ApplicationInterface::class);
+        $application = $this
+            ->getMockBuilder(ApplicationInterface::class)
+            ->getMock();
         $application
             ->expects($this->any())
             ->method('getEventManager')

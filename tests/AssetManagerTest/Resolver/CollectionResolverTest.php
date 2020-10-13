@@ -1,22 +1,28 @@
 <?php
 
-namespace AssetManagerTest\Service;
+namespace AssetManagerTest\Resolver;
 
+use ArrayObject;
 use Assetic\Asset;
 use Assetic\Asset\AssetCache;
 use Assetic\Cache\CacheInterface;
+use AssetManager\Exception\InvalidArgumentException;
+use AssetManager\Exception\RuntimeException;
 use AssetManager\Resolver\AggregateResolverAwareInterface;
 use AssetManager\Resolver\CollectionResolver;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\MimeResolver;
-use PHPUnit_Framework_TestCase;
+use AssetManagerTest\Service\CollectionsIterable;
+use PHPUnit\Framework\TestCase;
+use stdClass;
+use TypeError;
 
-class CollectionsResolverTest extends PHPUnit_Framework_TestCase
+class CollectionResolverTest extends TestCase
 {
     public function getResolverMock()
     {
-        $resolver = $this->getMock(ResolverInterface::class);
+        $resolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $resolver
             ->expects($this->once())
             ->method('resolve')
@@ -28,7 +34,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $resolver = new CollectionResolver;
+        $resolver = new CollectionResolver();
 
         // Check if valid instance
         $this->assertTrue($resolver instanceof ResolverInterface);
@@ -52,8 +58,8 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
     public function testSetCollections()
     {
-        $resolver = new CollectionResolver;
-        $collArr  = array(
+        $resolver = new CollectionResolver();
+        $collArr = array(
             'key1' => array('value1'),
             'key2' => array('value2'),
         );
@@ -80,7 +86,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
 
         // Overwrite with traversable
-        $resolver->setCollections(new CollectionsIterable);
+        $resolver->setCollections(new CollectionsIterable());
 
         $collArr = array(
             'collectionName1' => array(
@@ -106,21 +112,17 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($collArr, $resolver->getCollections());
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\InvalidArgumentException
-     */
     public function testSetCollectionFailsObject()
     {
+        $this->expectException(InvalidArgumentException::class);
         $resolver = new CollectionResolver;
 
-        $resolver->setCollections(new \stdClass);
+        $resolver->setCollections(new stdClass());
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\InvalidArgumentException
-     */
     public function testSetCollectionFailsString()
     {
+        $this->expectException(InvalidArgumentException::class);
         $resolver = new CollectionResolver;
 
         $resolver->setCollections('invalid');
@@ -130,7 +132,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
     {
         $resolver = new CollectionResolver;
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $aggregateResolver
             ->expects($this->once())
             ->method('resolve')
@@ -142,18 +146,13 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('world', $resolver->getAggregateResolver()->resolve('say'));
     }
 
-    /**
-     * @expectedException \PHPUnit_Framework_Error
-     */
     public function testSetAggregateResolverFails()
     {
-        if (PHP_MAJOR_VERSION >= 7) {
-            $this->setExpectedException('\TypeError');
-        }
+        $this->expectException(TypeError::class);
 
         $resolver = new CollectionResolver;
 
-        $resolver->setAggregateResolver(new \stdClass);
+        $resolver->setAggregateResolver(new stdClass());
     }
 
     /**
@@ -166,35 +165,31 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $this->assertNull($resolver->resolve('bacon'));
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testResolveNonArrayCollectionException()
     {
-        $resolver = new CollectionResolver(array('bacon'=>'bueno'));
+        $this->expectException(RuntimeException::class);
+        $resolver = new CollectionResolver(array('bacon' => 'bueno'));
 
         $resolver->resolve('bacon');
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testCollectionItemNonString()
     {
+        $this->expectException(RuntimeException::class);
         $resolver = new CollectionResolver(array(
-            'bacon' => array(new \stdClass())
+            'bacon' => array(new stdClass())
         ));
 
         $resolver->resolve('bacon');
 
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testCouldNotResolve()
     {
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $this->expectException(RuntimeException::class);
+        $aggregateResolver = $this
+            ->getMockBuilder(ResolverInterface::class)
+            ->getMock();
         $aggregateResolver
             ->expects($this->once())
             ->method('resolve')
@@ -210,12 +205,10 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $resolver->resolve('myCollection');
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testResolvesToNonAsset()
     {
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $this->expectException(RuntimeException::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->once())
             ->method('resolve')
@@ -231,11 +224,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $resolver->resolve('myCollection');
     }
 
-    /**
-     * @expectedException \AssetManager\Exception\RuntimeException
-     */
     public function testMimeTypesDontMatch()
     {
+        $this->expectException(RuntimeException::class);
         $callbackInvocationCount = 0;
         $callback = function () use (&$callbackInvocationCount) {
 
@@ -252,13 +243,13 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             return $$assetName;
         };
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->exactly(2))
             ->method('resolve')
             ->will($this->returnCallback($callback));
 
-        $assetFilterManager = $this->getMock(AssetFilterManager::class);
+        $assetFilterManager = $this->getMockBuilder(AssetFilterManager::class)->getMock();
         $assetFilterManager
             ->expects($this->once())
             ->method('setFilters')
@@ -280,15 +271,15 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
 
     public function testTwoCollectionsHasDifferentCacheKey()
     {
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
 
-        //assets with same 'last modifled time'.
+        //assets with same 'last modified time'.
         $now = time();
-        $bacon =  new Asset\StringAsset('bacon');
+        $bacon = new Asset\StringAsset('bacon');
         $bacon->setLastModified($now);
         $bacon->mimetype = 'text/plain';
 
-        $eggs =  new Asset\StringAsset('eggs');
+        $eggs = new Asset\StringAsset('eggs');
         $eggs->setLastModified($now);
         $eggs->mimetype = 'text/plain';
 
@@ -321,9 +312,9 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
         $collection1 = $resolver->resolve('collection1');
         $collection2 = $resolver->resolve('collection2');
 
-        $cacheInterface = $this->getMock(CacheInterface::class);
+        $cacheInterface = $this->getMockBuilder(CacheInterface::class)->getMock();
 
-        $cacheKeys = new \ArrayObject();
+        $cacheKeys = new ArrayObject();
         $callback = function ($key) use ($cacheKeys) {
             $cacheKeys[] = $key;
             return true;
@@ -367,7 +358,7 @@ class CollectionsResolverTest extends PHPUnit_Framework_TestCase
             return $$assetName;
         };
 
-        $aggregateResolver = $this->getMock(ResolverInterface::class);
+        $aggregateResolver = $this->getMockBuilder(ResolverInterface::class)->getMock();
         $aggregateResolver
             ->expects($this->exactly(3))
             ->method('resolve')

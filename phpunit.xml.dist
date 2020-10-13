@@ -10,7 +10,6 @@
         stopOnFailure="false"
         processIsolation="false"
         backupGlobals="false"
-        syntaxCheck="true"
         >
     <testsuite name="AssetManager tests">
         <directory>./tests/AssetManagerTest</directory>

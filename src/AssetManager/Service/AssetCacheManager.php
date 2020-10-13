@@ -138,9 +138,6 @@ class AssetCacheManager
         $classToCheck .= (substr($class, -5) === 'Cache') ? '' : 'Cache';
 
         switch ($classToCheck) {
-            case 'ApcCache':
-                $class = 'Assetic\Cache\ApcCache';
-                break;
             case 'FilesystemCache':
                 $class = 'Assetic\Cache\FilesystemCache';
                 break;
