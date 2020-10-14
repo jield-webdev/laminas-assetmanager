@@ -1,8 +1,8 @@
 # AssetManager
 By [Wesley Overdijk](http://blog.spoonx.nl/) and [Marco Pivetta](http://ocramius.github.com/)
 
-[![Build Status](https://secure.travis-ci.org/RWOverdijk/AssetManager.png?branch=master)](http://travis-ci.org/RWOverdijk/AssetManager)
-[![Latest Stable Version](https://poser.pugx.org/RWOverdijk/AssetManager/v/stable.png)](https://packagist.org/packages/RWOverdijk/AssetManager)
+[![Build Status](https://travis-ci.com/BigMichi1/assetmanager.svg?branch=master)](https://travis-ci.com/github/BigMichi1/assetmanager)
+[![Latest Stable Version](https://poser.pugx.org/bigmichi1/assetmanager/v)](//packagist.org/packages/bigmichi1/assetmanager)
 
 ## Introduction
 This module is intended for usage with a default directory structure of a
