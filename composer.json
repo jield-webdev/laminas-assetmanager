@@ -27,23 +27,23 @@
     }
   ],
   "require": {
-    "php": "^7.2",
-    "scssphp/scssphp": "~1.0",
-    "laminas/laminas-modulemanager": "^2.7.2",
-    "laminas/laminas-stdlib": "^2.7.7 || ^3.0.1",
-    "laminas/laminas-servicemanager": "^2.7.6 || ^3.1.1",
-    "laminas/laminas-loader": "^2.5.1",
-    "laminas/laminas-eventmanager": "^2.6.3 || ^3.0.1",
-    "laminas/laminas-mvc": "^2.7.9 || ^3.0.2",
+    "php": "^7.4 || ^8.0",
+    "scssphp/scssphp": "^1.4",
+    "laminas/laminas-modulemanager": "^2.10",
+    "laminas/laminas-stdlib": "^3.3",
+    "laminas/laminas-servicemanager": "^3.6",
+    "laminas/laminas-loader": "^2.6",
+    "laminas/laminas-eventmanager": "^3.3",
+    "laminas/laminas-mvc": "^3.2",
     "jield-webdev/assetic": "^2.1"
   },
   "require-dev": {
-    "laminas/laminas-http": "^2.5.4",
-    "laminas/laminas-view": "^2.8.1",
-    "laminas/laminas-cache": "^2.7.1",
-    "laminas/laminas-console": "^2.6",
+    "laminas/laminas-http": "^2.14",
+    "laminas/laminas-view": "^2.12",
+    "laminas/laminas-cache": "^2.11",
+    "laminas/laminas-console": "^2.8",
     "phpunit/phpunit": "^9",
-    "squizlabs/php_codesniffer": "~1.5.0"
+    "squizlabs/php_codesniffer": "~^3.5"
   },
   "suggest": {
     "laminas/laminas-mvc-console": "laminas-mvc-console provides the ability to expose laminas-mvc as a console application"
