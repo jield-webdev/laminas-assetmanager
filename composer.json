@@ -35,7 +35,7 @@
     "laminas/laminas-loader": "^2.6",
     "laminas/laminas-eventmanager": "^3.3",
     "laminas/laminas-mvc": "^3.2",
-    "jield-webdev/assetic": "^2.1"
+    "assetic/framework": "^2.0"
   },
   "require-dev": {
     "laminas/laminas-http": "^2.14",
