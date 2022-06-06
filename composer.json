@@ -28,17 +28,14 @@
   ],
   "require": {
     "php": "^8.0 || ^8.1",
-    "scssphp/scssphp": "~1.0",
+    "scssphp/scssphp": "~1.10",
     "laminas/laminas-modulemanager": "^2.11",
     "laminas/laminas-stdlib": "^3.7",
-    "laminas/laminas-servicemanager": "^3.1.1",
+    "laminas/laminas-servicemanager": "^3.11",
     "laminas/laminas-loader": "^2.8",
     "laminas/laminas-eventmanager": "^3.5",
     "laminas/laminas-mvc": "^3.3",
     "assetic/framework": "^v3.0.1"
-  },
-  "suggest": {
-    "laminas/laminas-mvc-console": "laminas-mvc-console provides the ability to expose laminas-mvc as a console application"
   },
   "extra": {
     "branch-alias": {
