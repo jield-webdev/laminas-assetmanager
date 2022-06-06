@@ -6,7 +6,7 @@ Updated to laminas by [Johan van der Heide](https://jield.nl)
 
 ## Introduction
 This module is intended for usage with a default directory structure of a
-[LaminasSkeletonApplication](https://github.com/laminasframework/LaminasSkeletonApplication/). It provides functionality to load
+[Laminas Skeleton Application](https://github.com/laminas/laminas-mvc-skeleton). It provides functionality to load
 assets and static files from your module directories through simple configuration.
 This allows you to avoid having to copy your files over to the `public/` directory, and makes usage of assets very
 similar to what already is possible with view scripts, which can be overridden by other modules.
