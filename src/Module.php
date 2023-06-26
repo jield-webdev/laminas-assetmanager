@@ -2,7 +2,6 @@
 
 namespace AssetManager;
 
-use Laminas\Console\Adapter\AdapterInterface;
 use Laminas\EventManager\EventInterface;
 use Laminas\EventManager\EventManagerInterface;
 use Laminas\Http\Response;
@@ -13,12 +12,7 @@ use Laminas\ModuleManager\Feature\BootstrapListenerInterface;
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
 use Laminas\Mvc\MvcEvent;
 
-/**
- * Module class
- *
- * @category   AssetManager
- * @package    AssetManager
- */
+
 class Module implements
     AutoloaderProviderInterface,
     ConfigProviderInterface,
@@ -83,21 +77,5 @@ class Module implements
         $priority     = -9999999;
         $eventManager->attach(MvcEvent::EVENT_DISPATCH, $callback, $priority);
         $eventManager->attach(MvcEvent::EVENT_DISPATCH_ERROR, $callback, $priority);
-    }
-
-    /**
-     * @param AdapterInterface $console
-     * @return array
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function getConsoleUsage(AdapterInterface $console)
-    {
-        return [
-            'Warmup',
-            'assetmanager warmup [--purge] [--verbose|-v]' => 'Warm AssetManager up',
-            ['--purge', '(optional) forces cache flushing'],
-            ['--verbose | -v', '(optional) verbose mode'],
-        ];
     }
 }
