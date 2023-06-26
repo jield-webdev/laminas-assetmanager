@@ -1,4 +1,5 @@
 <?php
+
 namespace AssetManager\View\Helper;
 
 use AssetManager\Resolver\ResolverInterface;
@@ -17,10 +18,12 @@ class Asset extends AbstractHelper
      */
     private $assetManagerResolver;
 
+    private $cache;
+
     /**
-     * @param ResolverInterface         $assetManagerResolver
+     * @param ResolverInterface $assetManagerResolver
      * @param AbstractCacheAdapter|null $cache
-     * @param array                     $config
+     * @param array $config
      */
     public function __construct(ResolverInterface $assetManagerResolver, $cache, $config)
     {
@@ -32,8 +35,8 @@ class Asset extends AbstractHelper
     /**
      * Append timestamp as query param to the filename
      *
-     * @param string   $filename
-     * @param string   $queryString
+     * @param string $filename
+     * @param string $queryString
      * @param int|null $timestamp
      *
      * @return string
@@ -81,9 +84,9 @@ class Asset extends AbstractHelper
         }
 
         // cache key based on the filename
-        $cacheKey = md5($filename);
+        $cacheKey           = md5($filename);
         $itemIsFoundInCache = false;
-        $filePath = $this->cache->getItem($cacheKey, $itemIsFoundInCache);
+        $filePath           = $this->cache->getItem($cacheKey, $itemIsFoundInCache);
 
         // if there is no element in the cache, elaborate and cache it
         if ($itemIsFoundInCache === false || $filePath === null) {
@@ -106,7 +109,7 @@ class Asset extends AbstractHelper
         if (empty($this->config['view_helper']['append_timestamp'])) {
             return $filename;
         }
-        
+
         // search the cache config for the specific file requested (if none, use the default one)
         if (isset($this->config['caching'][$filename])) {
             $cacheConfig = $this->config['caching'][$filename];
