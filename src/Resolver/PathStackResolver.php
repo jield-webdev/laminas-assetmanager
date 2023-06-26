@@ -2,13 +2,12 @@
 
 namespace AssetManager\Resolver;
 
-use Assetic\Asset\FileAsset;
 use Assetic\Factory\Resource\DirectoryResource;
 use AssetManager\Exception;
 use AssetManager\Service\MimeResolver;
+use Laminas\Stdlib\SplStack;
 use SplFileInfo;
 use Traversable;
-use Laminas\Stdlib\SplStack;
 
 /**
  * This resolver allows you to resolve from a stack of paths.
@@ -77,7 +76,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Rest the path stack to the paths provided
      *
-     * @param  Traversable|array                  $paths
+     * @param Traversable|array $paths
      * @throws Exception\InvalidArgumentException
      */
     public function setPaths($paths)
@@ -96,7 +95,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Normalize a path for insertion in the stack
      *
-     * @param  string $path
+     * @param string $path
      * @return string
      */
     protected function normalizePath($path)
@@ -110,7 +109,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Add a single path to the stack
      *
-     * @param  string                             $path
+     * @param string $path
      * @throws Exception\InvalidArgumentException
      */
     public function addPath($path)
@@ -148,12 +147,12 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Set LFI protection flag
      *
-     * @param  bool $flag
+     * @param bool $flag
      * @return self
      */
     public function setLfiProtection($flag)
     {
-        $this->lfiProtectionOn = (bool) $flag;
+        $this->lfiProtectionOn = (bool)$flag;
     }
 
     /**
@@ -182,7 +181,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
             if ($file->isReadable() && !$file->isDir()) {
                 $filePath = $file->getRealPath();
                 $mimeType = $this->getMimeResolver()->getMimeType($filePath);
-                $asset    = new FileAsset($filePath);
+                $asset    = new \AssetManager\Asset\FileAsset($filePath);
 
                 $asset->mimetype = $mimeType;
 
@@ -201,7 +200,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
         $collection = array();
         foreach ($this->getPaths() as $path) {
             $locations = new SplStack();
-            $pathInfo = new SplFileInfo($path);
+            $pathInfo  = new SplFileInfo($path);
             $locations->push($pathInfo);
             $basePath = $this->normalizePath($pathInfo->getRealPath());
 

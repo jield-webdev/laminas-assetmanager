@@ -32,7 +32,7 @@ class AssetCacheManager
      */
     public function __construct(
         ServiceLocatorInterface $serviceLocator,
-        $config
+                                $config
     )
     {
         $this->serviceLocator = $serviceLocator;
@@ -55,7 +55,7 @@ class AssetCacheManager
             return $asset;
         }
 
-        $assetCache           = new AssetCache($asset, $provider);
+        $assetCache           = new \AssetManager\Asset\AssetCache($asset, $provider);
         $assetCache->mimetype = $asset->mimetype;
 
         return $assetCache;

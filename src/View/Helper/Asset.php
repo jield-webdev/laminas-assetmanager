@@ -115,9 +115,7 @@ class Asset extends AbstractHelper
         }
 
         // query string params
-        $queryString = isset($this->config['view_helper']['query_string'])
-            ? $this->config['view_helper']['query_string']
-            : '_';
+        $queryString = $this->config['view_helper']['query_string'] ?? '_';
 
         // no cache dir is defined
         if (!isset($cacheConfig['options']['dir'])) {

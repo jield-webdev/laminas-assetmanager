@@ -2,7 +2,6 @@
 
 namespace AssetManager\Resolver;
 
-use Assetic\Asset\AssetCollection;
 use Assetic\Contracts\Asset\AssetInterface;
 use AssetManager\Exception;
 use AssetManager\Service\AssetFilterManager;
@@ -97,7 +96,8 @@ class CollectionResolver implements
             );
         }
 
-        $collection = new AssetCollection();
+        //fix82 Extend from the local assetCollection with mimetype support
+        $collection = new \AssetManager\Asset\AssetCollection();
         $mimeType   = null;
         $collection->setTargetPath($name);
         foreach ($this->collections[$name] as $asset) {

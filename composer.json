@@ -13,12 +13,12 @@
     {
       "name": "Wesley Overdijk",
       "email": "r.w.overdijk@gmail.com",
-      "homepage": "http://blog.spoonx.nl/"
+      "homepage": "https://blog.spoonx.nl/"
     },
     {
       "name": "Marco Pivetta",
       "email": "ocramius@gmail.com",
-      "homepage": "http://ocramius.github.com/"
+      "homepage": "https://ocramius.github.com/"
     },
     {
       "name": "Johan van der Heide",
@@ -27,20 +27,20 @@
     }
   ],
   "require": {
-    "php": "^8.0 || ^8.1",
-    "scssphp/scssphp": "~1.10",
-    "laminas/laminas-modulemanager": "^2.11",
-    "laminas/laminas-stdlib": "^3.7",
-    "laminas/laminas-servicemanager": "^3.11",
-    "laminas/laminas-loader": "^2.8",
-    "laminas/laminas-eventmanager": "^3.5",
-    "laminas/laminas-mvc": "^3.3",
-    "assetic/framework": "^v3.0.1"
+    "php": "^8.0 || ^8.1 || ^8.2",
+    "scssphp/scssphp": "~1.11",
+    "laminas/laminas-modulemanager": "^2.14",
+    "laminas/laminas-stdlib": "^3.17",
+    "laminas/laminas-servicemanager": "^3.21",
+    "laminas/laminas-loader": "^2.9",
+    "laminas/laminas-eventmanager": "^3.10",
+    "laminas/laminas-mvc": "^3.6",
+    "assetic/framework": "^v3.0.2"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "2.0-dev",
-      "dev-develop": "2.1-dev"
+      "dev-master": "3.0-dev",
+      "dev-develop": "3.1-dev"
     }
   },
   "autoload": {
