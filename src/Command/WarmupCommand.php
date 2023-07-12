@@ -26,7 +26,7 @@ final class WarmupCommand extends Command
     {
         $this->setName(self::$defaultName);
 
-        $this->addOption(name: 'purge', shortcut: 'p', mode: InputOption::VALUE_OPTIONAL, description: 'Purge index');
+        $this->addOption(name: 'purge', shortcut: 'p', mode: InputOption::VALUE_NONE, description: 'Purge index');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
