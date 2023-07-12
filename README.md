@@ -1,10 +1,11 @@
 # AssetManager
+
 By [Wesley Overdijk](http://blog.spoonx.nl/) and [Marco Pivetta](http://ocramius.github.com/)
 
 Updated to laminas by [Johan van der Heide](https://jield.nl)
 
-
 ## Introduction
+
 This module is intended for usage with a default directory structure of a
 [Laminas Skeleton Application](https://github.com/laminas/laminas-mvc-skeleton). It provides functionality to load
 assets and static files from your module directories through simple configuration.
@@ -14,7 +15,7 @@ In a nutshell, this module allows you to package assets with your module working
 
 ## Installation
 
- 1.  Require assetmanager:
+1. Require assetmanager:
 
 ```sh
 ./composer.phar require jield-webdev/laminas-assetmanager
@@ -22,7 +23,6 @@ In a nutshell, this module allows you to package assets with your module working
 ```
 
 ## Usage
-
 
 **Sample module config:**
 
@@ -68,8 +68,19 @@ return [
 ];
 ```
 
+**CLI usage:**
+
+Based on Laminas-CLI also support for asset warm up and purge is available.
+
+```sh
+./vendor/bin/laminas assetmanager:warmup --purge|-p --verbose|-v
+```
+
+This script will create all the assets and store them in the cache. If the purge flag is set, it will also purge the
+existing cache. This can be useful in a deployment scenario.
+
 *Please be careful, since this module will serve every file as-is, including PHP code.*
 
 The task list has been slimmed down a lot lately. However, there are still a couple of things that should be done.
 
- * Renewing the cache
+* Renewing the cache

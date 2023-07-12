@@ -29,6 +29,7 @@
   "require": {
     "php": "^8.0 || ^8.1 || ^8.2",
     "scssphp/scssphp": "~1.11",
+    "laminas/laminas-cli": "^1.8",
     "laminas/laminas-modulemanager": "^2.14",
     "laminas/laminas-stdlib": "^3.17.0",
     "laminas/laminas-servicemanager": "^3.21",
