@@ -1,6 +1,9 @@
 <?php
+
+use AssetManager\Command\WarmupCommand;
+
 return [
-    'service_manager' => [
+    'service_manager'                                                    => [
         'factories'  => [
             AssetManager\Service\AssetManager::class              => AssetManager\Service\AssetManagerServiceFactory::class,
             AssetManager\Service\AssetFilterManager::class        => AssetManager\Service\AssetFilterManagerServiceFactory::class,
@@ -12,6 +15,7 @@ return [
             AssetManager\Resolver\CollectionResolver::class       => AssetManager\Service\CollectionResolverServiceFactory::class,
             AssetManager\Resolver\ConcatResolver::class           => AssetManager\Service\ConcatResolverServiceFactory::class,
             AssetManager\Resolver\AliasPathStackResolver::class   => AssetManager\Service\AliasPathStackResolverServiceFactory::class,
+            WarmupCommand::class                                  => \Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory::class,
         ],
         'invokables' => [
             AssetManager\Service\MimeResolver::class => AssetManager\Service\MimeResolver::class,
@@ -22,7 +26,13 @@ return [
             'AssetManager\Service\AggregateResolver' => AssetManager\Resolver\AggregateResolver::class
         ],
     ],
-    'asset_manager'   => [
+    \Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory::class => [
+        WarmupCommand::class => [
+            \AssetManager\Service\AssetManager::class,
+            'Config'
+        ],
+    ],
+    'asset_manager'                                                      => [
         'clear_output_buffer' => true,
         'resolvers'           => [
             AssetManager\Resolver\MapResolver::class              => 3000,
@@ -38,12 +48,7 @@ return [
             'cache'            => null,
         ],
     ],
-    'controllers'     => [
-        'factories' => [
-            'AssetManager\Controller\Console' => AssetManager\Controller\ConsoleControllerFactory::class,
-        ],
-    ],
-    'view_helpers'    => [
+    'view_helpers'                                                       => [
         'factories' => [
             AssetManager\View\Helper\Asset::class => AssetManager\Service\AssetViewHelperFactory::class
         ],
@@ -51,19 +56,9 @@ return [
             'asset' => AssetManager\View\Helper\Asset::class
         ]
     ],
-    'console'         => [
-        'router' => [
-            'routes' => [
-                'AssetManager-warmup' => [
-                    'options' => [
-                        'route'    => 'assetmanager warmup [--purge] [--verbose|-v]',
-                        'defaults' => [
-                            'controller' => 'AssetManager\Controller\Console',
-                            'action'     => 'warmup',
-                        ],
-                    ],
-                ],
-            ],
+    'laminas-cli'                                                        => [
+        'commands' => [
+            'assetmanager:warmup' => WarmupCommand::class,
         ],
     ],
 ];
