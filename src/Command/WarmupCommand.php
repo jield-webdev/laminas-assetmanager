@@ -35,15 +35,18 @@ final class WarmupCommand extends Command
         $verbose = $input->getOption(name: 'verbose');
 
         if ($verbose) {
-            $output->writeln('<info>Start warmup</info>');
+            $output->writeln('<info>Start warming up</info>');
         }
 
         if ($purge) {
+            if ($verbose) {
+                $output->writeln('<comment>Purge requested, starting purge</comment>');
+            }
             $this->purgeCache($output, $verbose);
         }
 
         if ($verbose) {
-            $output->writeln('Collecting all assets');
+            $output->writeln('<info>Collecting all assets</info>');
         }
 
         $collection = $this->assetManager->getResolver()->collect();
@@ -54,7 +57,7 @@ final class WarmupCommand extends Command
             }
         } else {
             if ($verbose) {
-                $output->writeln(sprintf('Collected %d assets, warming up', count($collection)));
+                $output->writeln(sprintf('<comment>Collected %d assets, warming up</comment>', count($collection)));
             }
 
             foreach ($collection as $path) {
@@ -89,7 +92,7 @@ final class WarmupCommand extends Command
             }
 
             if ($verbose) {
-                $output->writeln(sprintf('<info>Purging %s on "%s"</info>', $config['options']['dir'], $configName));
+                $output->writeln(sprintf('Purging %s on "%s"', $configName, $config['options']['dir']));
             }
 
             $node = $config['options']['dir'];
@@ -111,6 +114,10 @@ final class WarmupCommand extends Command
         if (is_dir($node)) {
             $objects = scandir($node);
 
+            if ($verbose) {
+                $output->writeln(sprintf('Found folder %s', $node));
+            }
+
             foreach ($objects as $object) {
                 if ($object === '.' || $object === '..') {
                     continue;
@@ -118,9 +125,12 @@ final class WarmupCommand extends Command
                 $this->recursiveRemove($node . '/' . $object, $output, $verbose);
             }
         } elseif (is_file($node)) {
-            if ($verbose) {
-                $output->writeln(sprintf('<info>unlinking %s</info>', $node));
+
+            //Filetype check (we only want to purge css and js files)
+            if (!str_contains($node, '.css') && !str_contains($node, '.js')) {
+                return;
             }
+
             unlink($node);
         }
     }
