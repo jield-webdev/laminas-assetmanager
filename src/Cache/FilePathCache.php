@@ -54,7 +54,7 @@ class FilePathCache implements CacheInterface
     protected function cachedFile()
     {
         if (null === $this->cachedFile) {
-            $this->cachedFile = rtrim($this->dir, '/') . '/' . ltrim($this->filename, '/');
+            $this->cachedFile = rtrim($this->dir, '/') . '/' . trim($this->filename, '/');
         }
 
         return $this->cachedFile;
