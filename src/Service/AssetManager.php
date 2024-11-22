@@ -169,25 +169,29 @@ class AssetManager implements
      *
      * @param RequestInterface $request
      *
-     * @return mixed false when not found, AssetInterface when resolved.
+     * @return ?AssetInterface AssetInterface when not found, AssetInterface when resolved.
      */
-    protected function resolve(RequestInterface $request): mixed
+    protected function resolve(RequestInterface $request): ?AssetInterface
     {
         if (!$request instanceof Request) {
-            return false;
+            return null;
         }
 
         /* @var $request Request */
         /* @var $uri UriInterface */
-        $uri        = $request->getUri();
-        $fullPath   = $uri->getPath();
-        $path       = substr(string: (string)$fullPath, offset: strlen(string: $request->getBasePath()) + 1);
+        $uri      = $request->getUri();
+        $fullPath = $uri->getPath();
+        $path     = substr(string: (string)$fullPath, offset: strlen(string: $request->getBasePath()) + 1);
+
+        //Remove any trailing slash from the path
+        $path = rtrim(string: $path, characters: '/');
+
         $this->path = $path;
 
         $asset = $this->getResolver()->resolve(fileName: $path);
 
         if (!$asset instanceof AssetInterface) {
-            return false;
+            return null;
         }
 
         return $asset;
