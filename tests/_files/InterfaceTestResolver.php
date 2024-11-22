@@ -15,7 +15,7 @@ class InterfaceTestResolver implements
     public $calledMime;
     public $calledAggregate;
 
-    public function resolve($path)
+    public function resolve(string $fileName)
     {
     }
 
@@ -33,17 +33,17 @@ class InterfaceTestResolver implements
         $this->calledAggregate = true;
     }
 
-    public function setMimeResolver(MimeResolver $resolver)
+    public function setMimeResolver(MimeResolver $mimeResolver)
     {
         $this->calledMime = true;
     }
 
-    public function getMimeResolver()
+    public function getMimeResolver(): MimeResolver
     {
         return $this->calledMime;
     }
 
-    public function getAssetFilterManager()
+    public function getAssetFilterManager(): \AssetManager\Service\AssetFilterManager
     {
 
     }

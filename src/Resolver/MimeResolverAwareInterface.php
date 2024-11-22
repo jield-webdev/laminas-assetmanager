@@ -8,15 +8,13 @@ interface MimeResolverAwareInterface
 {
     /**
      * Set the MimeResolver.
-     *
-     * @param MimeResolver $resolver
      */
-    public function setMimeResolver(MimeResolver $resolver);
+    public function setMimeResolver(MimeResolver $mimeResolver);
 
     /**
      * Get the MimeResolver
      *
      * @return MimeResolver
      */
-    public function getMimeResolver();
+    public function getMimeResolver(): MimeResolver;
 }

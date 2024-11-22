@@ -3,9 +3,11 @@
 namespace AssetManager\Resolver;
 
 use Assetic\Factory\Resource\DirectoryResource;
+use AssetManager\Asset\FileAsset;
 use AssetManager\Exception;
 use AssetManager\Service\MimeResolver;
 use Laminas\Stdlib\SplStack;
+use Override;
 use SplFileInfo;
 use Traversable;
 
@@ -17,21 +19,21 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * @var SplStack
      */
-    protected $paths;
+    protected SplStack $paths;
 
     /**
      * Flag indicating whether or not LFI protection for rendering view scripts is enabled
      *
      * @var bool
      */
-    protected $lfiProtectionOn = true;
+    protected bool $lfiProtectionOn = true;
 
     /**
      * The mime resolver.
      *
      * @var MimeResolver
      */
-    protected $mimeResolver;
+    protected MimeResolver $mimeResolver;
 
     /**
      * Constructor
@@ -44,11 +46,12 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Set the mime resolver
      *
-     * @param MimeResolver $resolver
+     * @param MimeResolver $mimeResolver
      */
-    public function setMimeResolver(MimeResolver $resolver)
+    #[Override]
+    public function setMimeResolver(MimeResolver $mimeResolver): void
     {
-        $this->mimeResolver = $resolver;
+        $this->mimeResolver = $mimeResolver;
     }
 
     /**
@@ -56,7 +59,8 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @return MimeResolver
      */
-    public function getMimeResolver()
+    #[Override]
+    public function getMimeResolver(): MimeResolver
     {
         return $this->mimeResolver;
     }
@@ -64,32 +68,32 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Add many paths to the stack at once
      *
-     * @param array|Traversable $paths
+     * @param iterable $paths
      */
-    public function addPaths($paths)
+    public function addPaths(iterable $paths): void
     {
         foreach ($paths as $path) {
-            $this->addPath($path);
+            $this->addPath(path: $path);
         }
     }
 
     /**
      * Rest the path stack to the paths provided
      *
-     * @param Traversable|array $paths
+     * @param iterable $paths
      * @throws Exception\InvalidArgumentException
      */
-    public function setPaths($paths)
+    public function setPaths(iterable $paths): void
     {
-        if (!is_array($paths) && !$paths instanceof Traversable) {
-            throw new Exception\InvalidArgumentException(sprintf(
+        if (!is_array(value: $paths) && !$paths instanceof Traversable) {
+            throw new Exception\InvalidArgumentException(message: sprintf(
                 'Invalid argument provided for $paths, expecting either an array or Traversable object, "%s" given',
-                is_object($paths) ? get_class($paths) : gettype($paths)
+                get_debug_type(value: $paths)
             ));
         }
 
         $this->clearPaths();
-        $this->addPaths($paths);
+        $this->addPaths(paths: $paths);
     }
 
     /**
@@ -98,9 +102,9 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      * @param string $path
      * @return string
      */
-    protected function normalizePath($path)
+    protected function normalizePath(string $path): string
     {
-        $path = rtrim($path, '/\\');
+        $path = rtrim(string: $path, characters: '/\\');
         $path .= DIRECTORY_SEPARATOR;
 
         return $path;
@@ -112,16 +116,16 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      * @param string $path
      * @throws Exception\InvalidArgumentException
      */
-    public function addPath($path)
+    public function addPath(string $path): void
     {
-        if (!is_string($path)) {
-            throw new Exception\InvalidArgumentException(sprintf(
+        if (!is_string(value: $path)) {
+            throw new Exception\InvalidArgumentException(message: sprintf(
                 'Invalid path provided; must be a string, received %s',
-                gettype($path)
+                gettype(value: $path)
             ));
         }
 
-        $this->paths[] = $this->normalizePath($path);
+        $this->paths[] = $this->normalizePath(path: $path);
     }
 
     /**
@@ -129,7 +133,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @return void
      */
-    public function clearPaths()
+    public function clearPaths(): void
     {
         $this->paths = new SplStack();
     }
@@ -139,7 +143,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @return SplStack
      */
-    public function getPaths()
+    public function getPaths(): SplStack
     {
         return $this->paths;
     }
@@ -150,9 +154,11 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      * @param bool $flag
      * @return self
      */
-    public function setLfiProtection($flag)
+    public function setLfiProtection(bool $flag): PathStackResolver
     {
-        $this->lfiProtectionOn = (bool)$flag;
+        $this->lfiProtectionOn = $flag;
+
+        return $this;
     }
 
     /**
@@ -160,7 +166,7 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @return bool
      */
-    public function isLfiProtectionOn()
+    public function isLfiProtectionOn(): bool
     {
         return $this->lfiProtectionOn;
     }
@@ -168,20 +174,21 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * {@inheritDoc}
      */
-    public function resolve($name)
+    #[Override]
+    public function resolve(string $fileName): FileAsset|\Assetic\Contracts\Asset\AssetInterface|null
     {
-        if ($this->isLfiProtectionOn() && preg_match('#\.\.[\\\/]#', $name)) {
+        if ($this->isLfiProtectionOn() && preg_match(pattern: '#\.\.[\\\/]#', subject: $fileName)) {
             return null;
         }
 
         foreach ($this->getPaths() as $path) {
 
-            $file = new SplFileInfo($path . $name);
+            $file = new SplFileInfo(filename: $path . $fileName);
 
             if ($file->isReadable() && !$file->isDir()) {
                 $filePath = $file->getRealPath();
-                $mimeType = $this->getMimeResolver()->getMimeType($filePath);
-                $asset    = new \AssetManager\Asset\FileAsset($filePath);
+                $mimeType = $this->getMimeResolver()->getMimeType(filename: $filePath);
+                $asset    = new FileAsset(source: $filePath);
 
                 $asset->mimetype = $mimeType;
 
@@ -192,17 +199,14 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function collect()
+    public function collect(): array
     {
-        $collection = array();
+        $collection = [];
         foreach ($this->getPaths() as $path) {
             $locations = new SplStack();
-            $pathInfo  = new SplFileInfo($path);
-            $locations->push($pathInfo);
-            $basePath = $this->normalizePath($pathInfo->getRealPath());
+            $pathInfo  = new SplFileInfo(filename: $path);
+            $locations->push(value: $pathInfo);
+            $basePath = $this->normalizePath(path: $pathInfo->getRealPath());
 
             while (!$locations->isEmpty()) {
                 /** @var SplFileInfo $pathInfo */
@@ -210,13 +214,14 @@ class PathStackResolver implements ResolverInterface, MimeResolverAwareInterface
                 if (!$pathInfo->isReadable()) {
                     continue;
                 }
+
                 if ($pathInfo->isDir()) {
-                    $dir = new DirectoryResource($pathInfo->getRealPath());
+                    $dir = new DirectoryResource(path: $pathInfo->getRealPath());
                     foreach ($dir as $resource) {
-                        $locations->push(new SplFileInfo($resource));
+                        $locations->push(value: new SplFileInfo(filename: $resource));
                     }
                 } elseif (!isset($collection[$pathInfo->getPath()])) {
-                    $collection[] = substr($pathInfo->getRealPath(), strlen($basePath));
+                    $collection[] = substr(string: $pathInfo->getRealPath(), offset: strlen(string: $basePath));
                 }
             }
         }

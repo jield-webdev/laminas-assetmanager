@@ -2,14 +2,18 @@
 
 namespace AssetManager\Resolver;
 
+use Assetic\Contracts\Asset\AssetInterface;
+
 interface ResolverInterface
 {
     /**
      * Resolve an Asset
      *
-     * @param   string  $path   The path to resolve.
+     * @param string $fileName The path to resolve.
      *
-     * @return  \Assetic\Contracts\Asset\AssetInterface|null Asset instance when found, null when not.
+     * @return  AssetInterface|null Asset instance when found, null when not.
      */
-    public function resolve($path);
+    public function resolve(string $fileName): ?AssetInterface;
+
+    public function collect(): array;
 }

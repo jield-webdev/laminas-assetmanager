@@ -13,18 +13,6 @@ class FilePathCacheTest extends TestCase
     {
         $cache = new FilePathCache('/imagination', 'bacon.porn');
         $this->assertInstanceOf(CacheInterface::class, $cache);
-
-        $this->assertAttributeEquals(
-            '/imagination',
-            'dir',
-            $cache
-        );
-
-        $this->assertAttributeEquals(
-            'bacon.porn',
-            'filename',
-            $cache
-        );
     }
 
     public function testHas()

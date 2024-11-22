@@ -2,39 +2,24 @@
 
 namespace AssetManager;
 
+use AssetManager\Service\AssetManager;
 use Laminas\EventManager\EventInterface;
 use Laminas\EventManager\EventManagerInterface;
 use Laminas\Http\Response;
-use Laminas\Loader\AutoloaderFactory;
-use Laminas\Loader\StandardAutoloader;
-use Laminas\ModuleManager\Feature\AutoloaderProviderInterface;
 use Laminas\ModuleManager\Feature\BootstrapListenerInterface;
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
 use Laminas\Mvc\MvcEvent;
+use Override;
 
 
 class Module implements
-    AutoloaderProviderInterface,
     ConfigProviderInterface,
     BootstrapListenerInterface
 {
     /**
      * {@inheritDoc}
      */
-    public function getAutoloaderConfig()
-    {
-        return [
-            AutoloaderFactory::STANDARD_AUTOLOADER => [
-                StandardAutoloader::LOAD_NS => [
-                    __NAMESPACE__ => __DIR__,
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+    #[Override]
     public function getConfig()
     {
         return include __DIR__ . '/../config/module.config.php';
@@ -45,22 +30,25 @@ class Module implements
      *
      * @param MvcEvent $event
      */
-    public function onDispatch(MvcEvent $event)
+    public function onDispatch(MvcEvent $event): ?Response
     {
-        /* @var $response Response */
+        /** @var Response $response */
         $response = $event->getResponse();
-        if (!method_exists($response, 'getStatusCode') || $response->getStatusCode() !== 404) {
-            return;
+
+        if (!method_exists(object_or_class: $response, method: 'getStatusCode') || $response->getStatusCode() !== 404) {
+            return null;
         }
+
         $request        = $event->getRequest();
         $serviceManager = $event->getApplication()->getServiceManager();
-        $assetManager   = $serviceManager->get(__NAMESPACE__ . '\Service\AssetManager');
+        /** @var AssetManager $assetManager */
+        $assetManager = $serviceManager->get(__NAMESPACE__ . '\Service\AssetManager');
 
         if (!$assetManager->resolvesToAsset($request)) {
-            return;
+            return null;
         }
 
-        $response->setStatusCode(200);
+        $response->setStatusCode(code: 200);
 
         return $assetManager->setAssetOnResponse($response);
     }
@@ -68,14 +56,16 @@ class Module implements
     /**
      * {@inheritDoc}
      */
-    public function onBootstrap(EventInterface $event)
+    #[Override]
+    public function onBootstrap(EventInterface $e): void
     {
         // Attach for dispatch, and dispatch.error (with low priority to make sure statusCode gets set)
         /* @var $eventManager EventManagerInterface */
-        $eventManager = $event->getTarget()->getEventManager();
-        $callback     = [$this, 'onDispatch'];
+        /** @phpstan-ignore-next-line */
+        $eventManager = $e->getTarget()->getEventManager();
+        $callback     = $this->onDispatch(...);
         $priority     = -9999999;
-        $eventManager->attach(MvcEvent::EVENT_DISPATCH, $callback, $priority);
-        $eventManager->attach(MvcEvent::EVENT_DISPATCH_ERROR, $callback, $priority);
+        $eventManager->attach(eventName: MvcEvent::EVENT_DISPATCH, listener: $callback, priority: $priority);
+        $eventManager->attach(eventName: MvcEvent::EVENT_DISPATCH_ERROR, listener: $callback, priority: $priority);
     }
 }

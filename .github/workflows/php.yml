@@ -1,0 +1,46 @@
+name: PHP Composer
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        dependencies:
+          - locked
+          - highest
+        php:
+          - 8.3
+          - 8.4
+        include:
+          - php-version: 8.4
+            composer-options: "--ignore-platform-reqs"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Install PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: "xdebug"
+          php-version: "${{ matrix.php }}"
+          ini-values: memory_limit=-1
+
+      - name: "Install composer and dependencies"
+        uses: ramsey/composer-install@v3
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+          composer-options: ${{ matrix.composer-options }}
+
+      - name: Run Lint Checker suite
+        run: composer php-lint
+
+      - name: PHPStan test
+        run: composer phpstan

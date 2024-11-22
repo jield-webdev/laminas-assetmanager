@@ -2,11 +2,13 @@
 
 namespace AssetManager\Resolver;
 
+use AssetManager\Asset\AssetInterface;
 use AssetManager\Asset\FileAsset;
 use AssetManager\Asset\HttpAsset;
 use AssetManager\Exception;
 use AssetManager\Service\MimeResolver;
 use Laminas\Stdlib\ArrayUtils;
+use Override;
 use Traversable;
 
 /**
@@ -17,23 +19,23 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * @var array
      */
-    protected $map = [];
+    protected array $map = [];
 
     /**
      * @var MimeResolver The mime resolver.
      */
-    protected $mimeResolver;
+    protected MimeResolver $mimeResolver;
 
     /**
      * Constructor
      *
      * Instantiate and optionally populate map.
      *
-     * @param array|Traversable $map
+     * @param iterable $map
      */
-    public function __construct($map = [])
+    public function __construct(iterable $map = [])
     {
-        $this->setMap($map);
+        $this->setMap(map: $map);
     }
 
     /**
@@ -41,7 +43,7 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @return array
      */
-    public function getMap()
+    public function getMap(): array
     {
         return $this->map;
     }
@@ -51,21 +53,21 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * Maps should be arrays or Traversable objects with name => path pairs
      *
-     * @param array|Traversable $map
+     * @param iterable $map
      * @throws Exception\InvalidArgumentException
      */
-    public function setMap($map)
+    public function setMap(iterable $map): void
     {
-        if (!is_array($map) && !$map instanceof Traversable) {
-            throw new Exception\InvalidArgumentException(sprintf(
+        if (!is_array(value: $map) && !$map instanceof Traversable) {
+            throw new Exception\InvalidArgumentException(message: sprintf(
                 '%s: expects an array or Traversable, received "%s"',
                 __METHOD__,
-                (is_object($map) ? get_class($map) : gettype($map))
+                (get_debug_type(value: $map))
             ));
         }
 
         if ($map instanceof Traversable) {
-            $map = ArrayUtils::iteratorToArray($map);
+            $map = ArrayUtils::iteratorToArray(iterator: $map);
         }
 
         $this->map = $map;
@@ -74,22 +76,23 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * {@inheritDoc}
      */
-    public function resolve($name)
+    #[Override]
+    public function resolve(string $fileName): AssetInterface|null
     {
-        if (!isset($this->map[$name])) {
+        if (!isset($this->map[$fileName])) {
             return null;
         }
 
-        $file     = $this->map[$name];
-        $mimeType = $this->getMimeResolver()->getMimeType($file);
+        $file     = $this->map[$fileName];
+        $mimeType = $this->getMimeResolver()->getMimeType(filename: $file);
 
-        if (false === filter_var($file, FILTER_VALIDATE_URL)) {
-            $asset = new FileAsset($file);
+        if (false === filter_var(value: $file, filter: FILTER_VALIDATE_URL)) {
+            $asset = new FileAsset(source: $file);
         } else {
-            $asset = new HttpAsset($file);
+            $asset = new HttpAsset(sourceUrl: $file);
         }
 
-        $asset->mimetype = $mimeType;
+        $asset->setMimetype($mimeType);
 
         return $asset;
     }
@@ -99,7 +102,8 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
      *
      * @return MimeResolver
      */
-    public function getMimeResolver()
+    #[Override]
+    public function getMimeResolver(): MimeResolver
     {
         return $this->mimeResolver;
     }
@@ -107,18 +111,16 @@ class MapResolver implements ResolverInterface, MimeResolverAwareInterface
     /**
      * Set the mime resolver
      *
-     * @param MimeResolver $resolver
+     * @param MimeResolver $mimeResolver
      */
-    public function setMimeResolver(MimeResolver $resolver)
+    #[Override]
+    public function setMimeResolver(MimeResolver $mimeResolver): void
     {
-        $this->mimeResolver = $resolver;
+        $this->mimeResolver = $mimeResolver;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function collect()
+    public function collect(): array
     {
-        return array_keys($this->map);
+        return array_keys(array: $this->map);
     }
 }

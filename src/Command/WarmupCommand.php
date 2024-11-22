@@ -6,6 +6,7 @@ namespace AssetManager\Command;
 
 
 use AssetManager\Service\AssetManager;
+use Override;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,11 +18,12 @@ final class WarmupCommand extends Command
     /** @var string */
     protected static $defaultName = 'assetmanager:warmup';
 
-    public function __construct(private AssetManager $assetManager, private array $appConfig)
+    public function __construct(private readonly AssetManager $assetManager, private readonly array $appConfig)
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct(name: self::$defaultName);
     }
 
+    #[Override]
     protected function configure(): void
     {
         $this->setName(self::$defaultName);
@@ -29,47 +31,49 @@ final class WarmupCommand extends Command
         $this->addOption(name: 'purge', shortcut: 'p', mode: InputOption::VALUE_NONE, description: 'Purge index');
     }
 
+    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $purge   = $input->getOption(name: 'purge');
         $verbose = $input->getOption(name: 'verbose');
 
         if ($verbose) {
-            $output->writeln('<info>Start warming up</info>');
+            $output->writeln(messages: '<info>Start warming up</info>');
         }
 
         if ($purge) {
             if ($verbose) {
-                $output->writeln('<comment>Purge requested, starting purge</comment>');
+                $output->writeln(messages: '<comment>Purge requested, starting purge</comment>');
             }
-            $this->purgeCache($output, $verbose);
+
+            $this->purgeCache(output: $output, verbose: $verbose);
         }
 
         if ($verbose) {
-            $output->writeln('<info>Collecting all assets</info>');
+            $output->writeln(messages: '<info>Collecting all assets</info>');
         }
 
         $collection = $this->assetManager->getResolver()->collect();
 
-        if (count($collection) === 0) {
+        if (count(value: $collection) === 0) {
             if ($verbose) {
-                $output->writeln('<comment>No assets found</comment>');
+                $output->writeln(messages: '<comment>No assets found</comment>');
             }
         } else {
             if ($verbose) {
-                $output->writeln(sprintf('<comment>Collected %d assets, warming up</comment>', count($collection)));
+                $output->writeln(messages: sprintf('<comment>Collected %d assets, warming up</comment>', count(value: $collection)));
             }
 
             foreach ($collection as $path) {
-                $asset = $this->assetManager->getResolver()->resolve($path);
+                $asset = $this->assetManager->getResolver()->resolve(fileName: $path);
 
-                $this->assetManager->getAssetFilterManager()->setFilters($path, $asset);
-                $this->assetManager->getAssetCacheManager()->setCache($path, $asset)->dump();
+                $this->assetManager->getAssetFilterManager()->setFilters(path: $path, asset: $asset);
+                $this->assetManager->getAssetCacheManager()->setCache(path: $path, asset: $asset)->dump();
             }
         }
 
         if ($verbose) {
-            $output->writeln('<info>Warming up finished</info>');
+            $output->writeln(messages: '<info>Warming up finished</info>');
         }
 
         return Command::SUCCESS;
@@ -92,7 +96,7 @@ final class WarmupCommand extends Command
             }
 
             if ($verbose) {
-                $output->writeln(sprintf('Purging %s on "%s"', $configName, $config['options']['dir']));
+                $output->writeln(messages: sprintf('Purging %s on "%s"', $configName, $config['options']['dir']));
             }
 
             $node = $config['options']['dir'];
@@ -101,7 +105,7 @@ final class WarmupCommand extends Command
                 $node .= '/' . $configName;
             }
 
-            $this->recursiveRemove($node, $output, $verbose);
+            $this->recursiveRemove(node: $node, output: $output, verbose: $verbose);
         }
 
     }
@@ -111,27 +115,28 @@ final class WarmupCommand extends Command
      */
     private function recursiveRemove(string $node, OutputInterface $output, bool $verbose = false): void
     {
-        if (is_dir($node)) {
-            $objects = scandir($node);
+        if (is_dir(filename: $node)) {
+            $objects = scandir(directory: $node);
 
             if ($verbose) {
-                $output->writeln(sprintf('Found folder %s', $node));
+                $output->writeln(messages: sprintf('Found folder %s', $node));
             }
 
             foreach ($objects as $object) {
                 if ($object === '.' || $object === '..') {
                     continue;
                 }
-                $this->recursiveRemove($node . '/' . $object, $output, $verbose);
+
+                $this->recursiveRemove(node: $node . '/' . $object, output: $output, verbose: $verbose);
             }
-        } elseif (is_file($node)) {
+        } elseif (is_file(filename: $node)) {
 
             //Filetype check (we only want to purge css and js files)
-            if (!str_contains($node, '.css') && !str_contains($node, '.js')) {
+            if (!str_contains(haystack: $node, needle: '.css') && !str_contains(haystack: $node, needle: '.js')) {
                 return;
             }
 
-            unlink($node);
+            unlink(filename: $node);
         }
     }
 }

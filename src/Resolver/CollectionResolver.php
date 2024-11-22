@@ -2,11 +2,12 @@
 
 namespace AssetManager\Resolver;
 
-use Assetic\Contracts\Asset\AssetInterface;
+use AssetManager\Asset\AssetCollection;
 use AssetManager\Exception;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetFilterManagerAwareInterface;
 use Laminas\Stdlib\ArrayUtils;
+use Override;
 use Traversable;
 
 /**
@@ -19,31 +20,22 @@ class CollectionResolver implements
     AggregateResolverAwareInterface,
     AssetFilterManagerAwareInterface
 {
-    /**
-     * @var ResolverInterface
-     */
-    protected $aggregateResolver;
+    protected ResolverInterface $aggregateResolver;
 
-    /**
-     * @var AssetFilterManager The filterManager service.
-     */
-    protected $filterManager;
+    protected AssetFilterManager $filterManager;
 
-    /**
-     * @var array the collections
-     */
-    protected $collections = [];
+    protected array $collections = [];
 
     /**
      * Constructor
      *
      * Instantiate and optionally populate collections.
      *
-     * @param array|Traversable $collections
+     * @param iterable $collections
      */
-    public function __construct($collections = [])
+    public function __construct(iterable $collections = [])
     {
-        $this->setCollections($collections);
+        $this->setCollections(collections: $collections);
     }
 
     /**
@@ -51,7 +43,7 @@ class CollectionResolver implements
      *
      * @return array
      */
-    public function getCollections()
+    public function getCollections(): array
     {
         return $this->collections;
     }
@@ -61,21 +53,21 @@ class CollectionResolver implements
      *
      * Collections should be arrays or Traversable objects with name => path pairs
      *
-     * @param array|Traversable $collections
+     * @param iterable $collections
      * @throws Exception\InvalidArgumentException
      */
-    public function setCollections($collections)
+    public function setCollections(iterable $collections): void
     {
-        if (!is_array($collections) && !$collections instanceof Traversable) {
-            throw new Exception\InvalidArgumentException(sprintf(
+        if (!is_array(value: $collections) && !$collections instanceof Traversable) {
+            throw new Exception\InvalidArgumentException(message: sprintf(
                 '%s: expects an array or Traversable, received "%s"',
                 __METHOD__,
-                (is_object($collections) ? get_class($collections) : gettype($collections))
+                (get_debug_type(value: $collections))
             ));
         }
 
         if ($collections instanceof Traversable) {
-            $collections = ArrayUtils::iteratorToArray($collections);
+            $collections = ArrayUtils::iteratorToArray(iterator: $collections);
         }
 
         $this->collections = $collections;
@@ -84,57 +76,58 @@ class CollectionResolver implements
     /**
      * {@inheritDoc}
      */
-    public function resolve($name)
+    #[Override]
+    public function resolve(string $fileName): \AssetManager\Asset\AssetInterface|null
     {
-        if (!isset($this->collections[$name])) {
+        if (!isset($this->collections[$fileName])) {
             return null;
         }
 
-        if (!is_array($this->collections[$name])) {
+        if (!is_array(value: $this->collections[$fileName])) {
             throw new Exception\RuntimeException(
-                "Collection with name $name is not an an array."
+                message: sprintf('Collection with name %s is not an an array.', $fileName)
             );
         }
 
         //fix82 Extend from the local assetCollection with mimetype support
-        $collection = new \AssetManager\Asset\AssetCollection();
+        $collection = new AssetCollection();
         $mimeType   = null;
-        $collection->setTargetPath($name);
-        foreach ($this->collections[$name] as $asset) {
+        $collection->setTargetPath(targetPath: $fileName);
+        foreach ($this->collections[$fileName] as $asset) {
 
-            if (!is_string($asset)) {
+            if (!is_string(value: $asset)) {
                 throw new Exception\RuntimeException(
-                    'Asset should be of type string. got ' . gettype($asset)
+                    message: 'Asset should be of type string. got ' . gettype(value: $asset)
                 );
             }
 
-            if (null === ($res = $this->getAggregateResolver()->resolve($asset))) {
-                throw new Exception\RuntimeException("Asset '$asset' could not be found.");
+            if (null === ($res = $this->getAggregateResolver()->resolve(fileName: $asset))) {
+                throw new Exception\RuntimeException(message: sprintf("Asset '%s' could not be found.", $asset));
             }
 
-            if (!$res instanceof AssetInterface) {
+            if (!$res instanceof \AssetManager\Asset\AssetInterface) {
                 throw new Exception\RuntimeException(
-                    "Asset '$asset' does not implement Assetic\\Contracts\\Asset\\AssetInterface."
+                    message: sprintf("Asset '%s' does not implement AssetManager\\Asset\\AssetInterface.", $asset)
                 );
             }
 
-            if (null !== $mimeType && $res->mimetype !== $mimeType) {
-                throw new Exception\RuntimeException(sprintf(
+            if (null !== $mimeType && $res->getMimeType() !== $mimeType) {
+                throw new Exception\RuntimeException(message: sprintf(
                     'Asset "%s" from collection "%s" doesn\'t have the expected mime-type "%s".',
                     $asset,
-                    $name,
+                    $fileName,
                     $mimeType
                 ));
             }
 
-            $mimeType = $res->mimetype;
+            $mimeType = $res->getMimeType();
 
-            $this->getAssetFilterManager()->setFilters($asset, $res);
+            $this->getAssetFilterManager()->setFilters(path: $asset, asset: $res);
 
-            $collection->add($res);
+            $collection->add(asset: $res);
         }
 
-        $collection->mimetype = $mimeType;
+        $collection->setMimetype($mimeType);
 
         return $collection;
     }
@@ -144,7 +137,8 @@ class CollectionResolver implements
      *
      * @return ResolverInterface
      */
-    public function getAggregateResolver()
+    #[Override]
+    public function getAggregateResolver(): ResolverInterface
     {
         return $this->aggregateResolver;
     }
@@ -154,7 +148,8 @@ class CollectionResolver implements
      *
      * @param ResolverInterface $aggregateResolver
      */
-    public function setAggregateResolver(ResolverInterface $aggregateResolver)
+    #[Override]
+    public function setAggregateResolver(ResolverInterface $aggregateResolver): void
     {
         $this->aggregateResolver = $aggregateResolver;
     }
@@ -164,7 +159,8 @@ class CollectionResolver implements
      *
      * @return AssetFilterManager
      */
-    public function getAssetFilterManager()
+    #[Override]
+    public function getAssetFilterManager(): AssetFilterManager
     {
         return $this->filterManager;
     }
@@ -174,16 +170,17 @@ class CollectionResolver implements
      *
      * @param AssetFilterManager $filterManager
      */
-    public function setAssetFilterManager(AssetFilterManager $filterManager)
+    #[Override]
+    public function setAssetFilterManager(AssetFilterManager $filterManager): void
     {
         $this->filterManager = $filterManager;
     }
 
     /**
-     * {@inheritDoc}
+     * {}
      */
-    public function collect()
+    public function collect(): array
     {
-        return array_keys($this->collections);
+        return array_keys(array: $this->collections);
     }
 }

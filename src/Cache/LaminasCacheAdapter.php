@@ -4,6 +4,7 @@ namespace AssetManager\Cache;
 
 use Assetic\Contracts\Cache\CacheInterface;
 use Laminas\Cache\Storage\StorageInterface;
+use Override;
 
 /**
  * Laminas Cache Storage Adapter for Assetic
@@ -12,7 +13,7 @@ class LaminasCacheAdapter implements CacheInterface
 {
 
     /** @var StorageInterface */
-    protected $laminasCache;
+    protected StorageInterface $laminasCache;
 
     /**
      * Constructor
@@ -27,6 +28,7 @@ class LaminasCacheAdapter implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[Override]
     public function has($key)
     {
         return $this->laminasCache->hasItem($key);
@@ -35,6 +37,7 @@ class LaminasCacheAdapter implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[Override]
     public function get($key)
     {
         return $this->laminasCache->getItem($key);
@@ -43,6 +46,7 @@ class LaminasCacheAdapter implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[Override]
     public function set($key, $value)
     {
         return $this->laminasCache->setItem($key, $value);
@@ -51,6 +55,7 @@ class LaminasCacheAdapter implements CacheInterface
     /**
      * {@inheritDoc}
      */
+    #[Override]
     public function remove($key)
     {
         return $this->laminasCache->removeItem($key);

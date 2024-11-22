@@ -3,6 +3,7 @@
 namespace AssetManager\Resolver;
 
 use Laminas\Stdlib\PriorityQueue;
+use Override;
 
 /**
  * The aggregate resolver consists out of a multitude of
@@ -13,7 +14,7 @@ class AggregateResolver implements ResolverInterface
     /**
      * @var PriorityQueue|ResolverInterface[]
      */
-    protected $queue;
+    protected array|PriorityQueue $queue;
 
     /**
      * Constructor
@@ -28,22 +29,25 @@ class AggregateResolver implements ResolverInterface
     /**
      * Attach a resolver
      *
-     * @param  ResolverInterface $resolver
-     * @param  int               $priority
+     * @param ResolverInterface $resolver
+     * @param int $priority
      * @return self
      */
-    public function attach(ResolverInterface $resolver, $priority = 1)
+    public function attach(ResolverInterface $resolver, int $priority = 1): AggregateResolver
     {
-        $this->queue->insert($resolver, $priority);
+        $this->queue->insert(data: $resolver, priority: $priority);
+
+        return $this;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function resolve($name)
+    #[Override]
+    public function resolve(string $fileName): ?\Assetic\Contracts\Asset\AssetInterface
     {
         foreach ($this->queue as $resolver) {
-            $resource = $resolver->resolve($name);
+            $resource = $resolver->resolve(fileName: $fileName);
             if (null !== $resource) {
                 return $resource;
             }
@@ -52,21 +56,18 @@ class AggregateResolver implements ResolverInterface
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function collect()
+    public function collect(): array
     {
-        $collection = array();
+        $collection = [];
 
         foreach ($this->queue as $resolver) {
-            if (!method_exists($resolver, 'collect')) {
+            if (!method_exists(object_or_class: $resolver, method: 'collect')) {
                 continue;
             }
 
             $collection = array_merge($resolver->collect(), $collection);
         }
 
-        return array_unique($collection);
+        return array_unique(array: $collection);
     }
 }
