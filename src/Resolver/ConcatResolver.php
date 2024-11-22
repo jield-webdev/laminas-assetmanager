@@ -2,14 +2,13 @@
 
 namespace AssetManager\Resolver;
 
-use Assetic\Contracts\Asset\AssetInterface;
 use AssetManager\Asset\AggregateAsset;
 use AssetManager\Exception;
 use AssetManager\Service\AssetFilterManager;
 use AssetManager\Service\AssetFilterManagerAwareInterface;
 use AssetManager\Service\MimeResolver;
-use Traversable;
 use Laminas\Stdlib\ArrayUtils;
+use Override;
 
 /**
  * This resolver allows the resolving of concatenated files.
@@ -24,43 +23,44 @@ class ConcatResolver implements
     /**
      * @var null|ResolverInterface
      */
-    protected $aggregateResolver;
+    protected ?ResolverInterface $aggregateResolver;
 
     /**
      * @var null|AssetFilterManager The filterManager service.
      */
-    protected $filterManager;
+    protected ?AssetFilterManager $filterManager;
 
     /**
      * @var array the concats
      */
-    protected $concats = array();
+    protected array $concats = [];
 
     /**
      * @var MimeResolver The mime resolver.
      */
-    protected $mimeResolver;
+    protected MimeResolver $mimeResolver;
 
     /**
      * Constructor
      *
      * Instantiate and optionally populate concats.
      *
-     * @param array|Traversable $concats
+     * @param iterable $concats
      */
-    public function __construct($concats = array())
+    public function __construct(iterable $concats = [])
     {
-        $this->setConcats($concats);
+        $this->setConcats(concats: $concats);
     }
 
     /**
      * Set the mime resolver
      *
-     * @param MimeResolver $resolver
+     * @param MimeResolver $mimeResolver
      */
-    public function setMimeResolver(MimeResolver $resolver)
+    #[Override]
+    public function setMimeResolver(MimeResolver $mimeResolver): void
     {
-        $this->mimeResolver = $resolver;
+        $this->mimeResolver = $mimeResolver;
     }
 
     /**
@@ -68,7 +68,8 @@ class ConcatResolver implements
      *
      * @return MimeResolver
      */
-    public function getMimeResolver()
+    #[Override]
+    public function getMimeResolver(): MimeResolver
     {
         return $this->mimeResolver;
     }
@@ -78,12 +79,12 @@ class ConcatResolver implements
      *
      * Concats should be arrays or Traversable objects with name => path pairs
      *
-     * @param  array|Traversable                  $concats
+     * @param iterable $concats
      * @throws Exception\InvalidArgumentException
      */
-    public function setConcats($concats)
+    public function setConcats(iterable $concats): void
     {
-        $this->concats = ArrayUtils::iteratorToArray($concats);
+        $this->concats = ArrayUtils::iteratorToArray(iterator: $concats);
     }
 
     /**
@@ -91,27 +92,25 @@ class ConcatResolver implements
      *
      * @param ResolverInterface $aggregateResolver
      */
-    public function setAggregateResolver(ResolverInterface $aggregateResolver)
+    #[Override]
+    public function setAggregateResolver(ResolverInterface $aggregateResolver): void
     {
         $this->aggregateResolver = $aggregateResolver;
     }
 
     /**
      * Get the aggregate resolver.
-     *
-     * @return ResolverInterface
      */
-    public function getAggregateResolver()
+    #[Override]
+    public function getAggregateResolver(): ResolverInterface
     {
         return $this->aggregateResolver;
     }
 
     /**
      * Retrieve the concats
-     *
-     * @return array
      */
-    public function getConcats()
+    public function getConcats(): array
     {
         return $this->concats;
     }
@@ -119,40 +118,42 @@ class ConcatResolver implements
     /**
      * {@inheritDoc}
      */
-    public function resolve($name)
+    #[Override]
+    public function resolve(string $fileName): \AssetManager\Asset\AssetInterface|null
     {
-        if (!isset($this->concats[$name])) {
+        if (!isset($this->concats[$fileName])) {
             return null;
         }
 
-        $resolvedAssets = array();
+        $resolvedAssets = [];
 
-        foreach ((array) $this->concats[$name] as $assetName) {
+        foreach ((array)$this->concats[$fileName] as $assetName) {
 
-            $resolvedAsset = $this->getAggregateResolver()->resolve((string) $assetName);
+            $resolvedAsset = $this->getAggregateResolver()->resolve(fileName: (string)$assetName);
 
-            if (!$resolvedAsset instanceof AssetInterface) {
+            if (!$resolvedAsset instanceof \AssetManager\Asset\AssetInterface) {
                 throw new Exception\RuntimeException(
-                    sprintf(
+                    message: sprintf(
                         'Asset "%s" from collection "%s" can\'t be resolved '
-                        .'to an Asset implementing Assetic\Contracts\Asset\AssetInterface.',
+                        . 'to an Asset implementing \AssetManager\Asset\AssetInterface.',
                         $assetName,
-                        $name
+                        $fileName
                     )
                 );
             }
 
-            $resolvedAsset->mimetype = $this->getMimeResolver()->getMimeType(
-                $resolvedAsset->getSourceRoot() . $resolvedAsset->getSourcePath()
-            );
+            $resolvedAsset->setMimeType($this->getMimeResolver()->getMimeType(
+                filename: $resolvedAsset->getSourceRoot() . $resolvedAsset->getSourcePath()
+            ));
 
-            $this->getAssetFilterManager()->setFilters($assetName, $resolvedAsset);
+            $this->getAssetFilterManager()->setFilters(path: $assetName, asset: $resolvedAsset);
 
             $resolvedAssets[] = $resolvedAsset;
         }
-        $aggregateAsset = new AggregateAsset($resolvedAssets);
-        $this->getAssetFilterManager()->setFilters($name, $aggregateAsset);
-        $aggregateAsset->setTargetPath($name);
+
+        $aggregateAsset = new AggregateAsset(content: $resolvedAssets);
+        $this->getAssetFilterManager()->setFilters(path: $fileName, asset: $aggregateAsset);
+        $aggregateAsset->setTargetPath(targetPath: $fileName);
 
         return $aggregateAsset;
     }
@@ -162,26 +163,23 @@ class ConcatResolver implements
      *
      * @param AssetFilterManager $filterManager
      */
-    public function setAssetFilterManager(AssetFilterManager $filterManager)
+    #[Override]
+    public function setAssetFilterManager(AssetFilterManager $filterManager): void
     {
         $this->filterManager = $filterManager;
     }
 
     /**
      * Get the AssetFilterManager
-     *
-     * @return AssetFilterManager
      */
-    public function getAssetFilterManager()
+    #[Override]
+    public function getAssetFilterManager(): AssetFilterManager
     {
         return $this->filterManager;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function collect()
+    public function collect(): array
     {
-        return array_keys($this->concats);
+        return array_keys(array: $this->concats);
     }
 }

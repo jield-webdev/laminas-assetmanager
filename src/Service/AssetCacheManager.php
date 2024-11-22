@@ -2,12 +2,13 @@
 
 namespace AssetManager\Service;
 
-use Assetic\Asset\AssetCache;
 use Assetic\Cache\FilesystemCache;
-use Assetic\Contracts\Asset\AssetInterface;
 use Assetic\Contracts\Cache\CacheInterface;
+use AssetManager\Asset\AssetCache;
+use AssetManager\Asset\AssetInterface;
 use AssetManager\Cache\FilePathCache;
 use Laminas\ServiceManager\ServiceLocatorInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Asset Cache Manager.  Sets asset cache based on configuration.
@@ -15,28 +16,16 @@ use Laminas\ServiceManager\ServiceLocatorInterface;
 class AssetCacheManager
 {
     /**
-     * @var \Laminas\ServiceManager\ServiceLocatorInterface
-     */
-    protected $serviceLocator;
-
-    /**
-     * @var array Cache configuration.
-     */
-    protected $config = [];
-
-    /**
      * Construct the AssetCacheManager
      *
-     * @param ServiceLocatorInterface $serviceLocator
+     * @param ServiceLocatorInterface $container
      * @param array $config
      */
     public function __construct(
-        ServiceLocatorInterface $serviceLocator,
-                                $config
+        protected ContainerInterface $container,
+        protected array              $config = []
     )
     {
-        $this->serviceLocator = $serviceLocator;
-        $this->config         = $config;
     }
 
     /**
@@ -45,18 +34,18 @@ class AssetCacheManager
      * @param string $path Path to asset
      * @param AssetInterface $asset Assetic Asset Interface
      *
-     * @return  AssetCache|AssetInterface
+     * @return AssetInterface|AssetCache
      */
-    public function setCache($path, AssetInterface $asset)
+    public function setCache(string $path, AssetInterface $asset): AssetInterface|AssetCache
     {
-        $provider = $this->getProvider($path);
+        $provider = $this->getProvider(path: $path);
 
         if (!$provider instanceof CacheInterface) {
             return $asset;
         }
 
-        $assetCache           = new \AssetManager\Asset\AssetCache($asset, $provider);
-        $assetCache->mimetype = $asset->mimetype;
+        $assetCache = new AssetCache(asset: $asset, cache: $provider);
+        $assetCache->setMimetype($asset->getMimeType());
 
         return $assetCache;
     }
@@ -68,20 +57,20 @@ class AssetCacheManager
      */
     private function getProvider(string $path)
     {
-        $cacheProvider = $this->getCacheProviderConfig($path);
+        $cacheProvider = $this->getCacheProviderConfig(path: $path);
 
         if (!$cacheProvider) {
             return null;
         }
 
-        if (is_string($cacheProvider['cache']) &&
-            $this->serviceLocator->has($cacheProvider['cache'])
+        if (is_string(value: $cacheProvider['cache']) &&
+            $this->container->has($cacheProvider['cache'])
         ) {
-            return $this->serviceLocator->get($cacheProvider['cache']);
+            return $this->container->get($cacheProvider['cache']);
         }
 
         // Left here for BC.  Please consider defining a ZF2 service instead.
-        if (is_callable($cacheProvider['cache'])) {
+        if (is_callable(value: $cacheProvider['cache'])) {
             return call_user_func($cacheProvider['cache'], $path);
         }
 
@@ -92,7 +81,7 @@ class AssetCacheManager
             $dir = $cacheProvider['options']['dir'];
         }
 
-        $class = $this->classMapper($class);
+        $class = $this->classMapper(class: $class);
         return new $class($dir, $path);
     }
 
@@ -125,24 +114,19 @@ class AssetCacheManager
     /**
      * Class mapper to provide backwards compatibility
      *
-     * @param $class
+     * @param string $class
      *
      * @return string
      */
-    private function classMapper($class): string
+    private function classMapper(string $class): string
     {
         $classToCheck = $class;
-        $classToCheck .= (substr($class, -5) === 'Cache') ? '' : 'Cache';
+        $classToCheck .= (str_ends_with(haystack: $class, needle: 'Cache')) ? '' : 'Cache';
 
-        switch ($classToCheck) {
-            case 'FilesystemCache':
-                $class = FilesystemCache::class;
-                break;
-            case 'FilePathCache':
-                $class = FilePathCache::class;
-                break;
-        }
-
-        return $class;
+        return match ($classToCheck) {
+            'FilesystemCache' => FilesystemCache::class,
+            'FilePathCache'   => FilePathCache::class,
+            default           => $class,
+        };
     }
 }

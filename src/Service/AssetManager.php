@@ -6,8 +6,10 @@ use Assetic\Contracts\Asset\AssetInterface;
 use AssetManager\Exception;
 use AssetManager\Resolver\ResolverInterface;
 use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Http\Response;
 use Laminas\Stdlib\RequestInterface;
-use Laminas\Stdlib\ResponseInterface;
+use Laminas\Uri\UriInterface;
+use Override;
 
 /**
  * @category    AssetManager
@@ -20,50 +22,48 @@ class AssetManager implements
     /**
      * @var ResolverInterface
      */
-    protected $resolver;
+    protected ResolverInterface $resolver;
 
     /**
      * @var AssetFilterManager The AssetFilterManager service.
      */
-    protected $filterManager;
+    protected AssetFilterManager $filterManager;
 
     /**
      * @var AssetCacheManager The AssetCacheManager service.
      */
-    protected $cacheManager;
+    protected AssetCacheManager $cacheManager;
 
     /**
      * @var AssetInterface The asset
      */
-    protected $asset;
+    protected ?AssetInterface $asset = null;
 
     /**
      * @var string The requested path
      */
-    protected $path;
+    protected string $path;
 
     /**
      * @var array The asset_manager configuration
      */
-    protected $config;
+    protected array $config;
 
     /**
      * @var bool Whether this instance has at least one asset successfully set on response
      */
-    protected $assetSetOnResponse = false;
+    protected bool $assetSetOnResponse = false;
 
     /**
      * Constructor
      *
      * @param ResolverInterface $resolver
-     * @param array             $config
-     *
-     * @return AssetManager
+     * @param array $config
      */
-    public function __construct($resolver, $config = array())
+    public function __construct(ResolverInterface $resolver, array $config = [])
     {
-        $this->setResolver($resolver);
-        $this->setConfig($config);
+        $this->setResolver(resolver: $resolver);
+        $this->setConfig(config: $config);
     }
 
     /**
@@ -71,21 +71,18 @@ class AssetManager implements
      *
      * @param array $config
      */
-    protected function setConfig(array $config)
+    protected function setConfig(array $config): void
     {
         $this->config = $config;
     }
 
     /**
      * Check if the request resolves to an asset.
-     *
-     * @param    RequestInterface $request
-     * @return   boolean
      */
-    public function resolvesToAsset(RequestInterface $request)
+    public function resolvesToAsset(RequestInterface $request): bool
     {
         if (null === $this->asset) {
-            $this->asset = $this->resolve($request);
+            $this->asset = $this->resolve(request: $request);
         }
 
         return (bool)$this->asset;
@@ -96,7 +93,7 @@ class AssetManager implements
      *
      * @return bool
      */
-    public function assetSetOnResponse()
+    public function assetSetOnResponse(): bool
     {
         return $this->assetSetOnResponse;
     }
@@ -106,7 +103,7 @@ class AssetManager implements
      *
      * @param ResolverInterface $resolver
      */
-    public function setResolver(ResolverInterface $resolver)
+    public function setResolver(ResolverInterface $resolver): void
     {
         $this->resolver = $resolver;
     }
@@ -116,7 +113,7 @@ class AssetManager implements
      *
      * @return ResolverInterface
      */
-    public function getResolver()
+    public function getResolver(): ResolverInterface
     {
         return $this->resolver;
     }
@@ -124,49 +121,41 @@ class AssetManager implements
     /**
      * Set the asset on the response, including headers and content.
      *
-     * @param    ResponseInterface $response
-     * @return   ResponseInterface
+     * @param Response $response
+     * @return   Response
      * @throws   Exception\RuntimeException
      */
-    public function setAssetOnResponse(ResponseInterface $response)
+    public function setAssetOnResponse(Response $response): Response
     {
-        if (!$this->asset instanceof AssetInterface) {
+        if (!$this->asset instanceof \AssetManager\Asset\AssetInterface) {
             throw new Exception\RuntimeException(
-                'Unable to set asset on response. Request has not been resolved to an asset.'
+                message: 'Unable to set asset on response. Request has not been resolved to an asset.'
             );
         }
 
-        // @todo: Create Asset wrapper for mimetypes
         if (empty($this->asset->mimetype)) {
-            throw new Exception\RuntimeException('Expected property "mimetype" on asset.');
+            throw new Exception\RuntimeException(message: 'Expected property "mimetype" on asset.');
         }
 
-        $this->getAssetFilterManager()->setFilters($this->path, $this->asset);
+        $this->getAssetFilterManager()->setFilters(path: $this->path, asset: $this->asset);
 
-        $this->asset    = $this->getAssetCacheManager()->setCache($this->path, $this->asset);
-        $mimeType       = $this->asset->mimetype;
-        $assetContents  = $this->asset->dump();
-
+        $this->asset   = $this->getAssetCacheManager()->setCache(path: $this->path, asset: $this->asset);
+        $mimeType      = $this->asset->getMimetype();
+        $assetContents = $this->asset->dump();
         // @codeCoverageIgnoreStart
-        if (function_exists('mb_strlen')) {
-            $contentLength = mb_strlen($assetContents, '8bit');
-        } else {
-            $contentLength = strlen($assetContents);
-        }
-        // @codeCoverageIgnoreEnd
+        $contentLength = function_exists(function: 'mb_strlen') ? mb_strlen($assetContents, '8bit') : strlen(string: $assetContents);
 
-        if (!empty($this->config['clear_output_buffer']) && $this->config['clear_output_buffer']) {
-            // Only clean the output buffer if it's turned on and something
-            // has been buffered.
-            if (ob_get_length() > 0) {
-                ob_clean();
-            }
+        // @codeCoverageIgnoreEnd
+        // Only clean the output buffer if it's turned on and something
+        // has been buffered.
+        if (!empty($this->config['clear_output_buffer']) && $this->config['clear_output_buffer'] && ob_get_length() > 0) {
+            ob_clean();
         }
 
         $response->getHeaders()
-                 ->addHeaderLine('Content-Transfer-Encoding', 'binary')
-                 ->addHeaderLine('Content-Type', $mimeType)
-                 ->addHeaderLine('Content-Length', $contentLength);
+            ->addHeaderLine('Content-Transfer-Encoding', 'binary')
+            ->addHeaderLine('Content-Type', $mimeType)
+            ->addHeaderLine('Content-Length', $contentLength);
 
         $response->setContent($assetContents);
 
@@ -182,19 +171,20 @@ class AssetManager implements
      *
      * @return mixed false when not found, AssetInterface when resolved.
      */
-    protected function resolve(RequestInterface $request)
+    protected function resolve(RequestInterface $request): mixed
     {
         if (!$request instanceof Request) {
             return false;
         }
 
         /* @var $request Request */
-        /* @var $uri \Laminas\Uri\UriInterface */
+        /* @var $uri UriInterface */
         $uri        = $request->getUri();
         $fullPath   = $uri->getPath();
-        $path       = substr($fullPath, strlen($request->getBasePath()) + 1);
+        $path       = substr(string: (string)$fullPath, offset: strlen(string: $request->getBasePath()) + 1);
         $this->path = $path;
-        $asset      = $this->getResolver()->resolve($path);
+
+        $asset = $this->getResolver()->resolve(fileName: $path);
 
         if (!$asset instanceof AssetInterface) {
             return false;
@@ -208,7 +198,8 @@ class AssetManager implements
      *
      * @param AssetFilterManager $filterManager
      */
-    public function setAssetFilterManager(AssetFilterManager $filterManager)
+    #[Override]
+    public function setAssetFilterManager(AssetFilterManager $filterManager): void
     {
         $this->filterManager = $filterManager;
     }
@@ -218,7 +209,8 @@ class AssetManager implements
      *
      * @return AssetFilterManager
      */
-    public function getAssetFilterManager()
+    #[Override]
+    public function getAssetFilterManager(): AssetFilterManager
     {
         return $this->filterManager;
     }
@@ -228,7 +220,8 @@ class AssetManager implements
      *
      * @param AssetCacheManager $cacheManager
      */
-    public function setAssetCacheManager(AssetCacheManager $cacheManager)
+    #[Override]
+    public function setAssetCacheManager(AssetCacheManager $cacheManager): void
     {
         $this->cacheManager = $cacheManager;
     }
@@ -238,7 +231,8 @@ class AssetManager implements
      *
      * @return AssetCacheManager
      */
-    public function getAssetCacheManager()
+    #[Override]
+    public function getAssetCacheManager(): AssetCacheManager
     {
         return $this->cacheManager;
     }

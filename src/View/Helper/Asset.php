@@ -9,27 +9,12 @@ use Laminas\View\Helper\AbstractHelper;
 class Asset extends AbstractHelper
 {
     /**
-     * @var array
-     */
-    private $config;
-
-    /**
-     * @var ResolverInterface
-     */
-    private $assetManagerResolver;
-
-    private $cache;
-
-    /**
      * @param ResolverInterface $assetManagerResolver
      * @param AbstractCacheAdapter|null $cache
      * @param array $config
      */
-    public function __construct(ResolverInterface $assetManagerResolver, $cache, $config)
+    public function __construct(private readonly ResolverInterface $assetManagerResolver, private readonly ?AbstractCacheAdapter $cache, private readonly array $config)
     {
-        $this->assetManagerResolver = $assetManagerResolver;
-        $this->cache                = $cache;
-        $this->config               = $config;
     }
 
     /**
@@ -41,12 +26,12 @@ class Asset extends AbstractHelper
      *
      * @return string
      */
-    private function appendTimestamp($filename, $queryString, $timestamp = null)
+    private function appendTimestamp(string $filename, string $queryString, ?int $timestamp = null): string
     {
         // current timestamp as default
-        $timestamp = $timestamp === null ? time() : $timestamp;
+        $timestamp ??= time();
 
-        return $filename . '?' . urlencode($queryString) . '=' . $timestamp;
+        return $filename . '?' . urlencode(string: $queryString) . '=' . $timestamp;
     }
 
     /**
@@ -56,13 +41,13 @@ class Asset extends AbstractHelper
      * @param string $queryString
      * @return string
      */
-    private function elaborateFilePath($filename, $queryString)
+    private function elaborateFilePath(string $filename, string $queryString): string
     {
-        $asset = $this->assetManagerResolver->resolve($filename);
+        $asset = $this->assetManagerResolver->resolve(fileName: $filename);
         if ($asset !== null) {
 
             // append last modified date to the filepath and use a custom query string
-            return $this->appendTimestamp($filename, $queryString, $asset->getLastModified());
+            return $this->appendTimestamp(filename: $filename, queryString: $queryString, timestamp: $asset->getLastModified());
         }
 
         return $filename;
@@ -76,7 +61,7 @@ class Asset extends AbstractHelper
      *
      * @return mixed|string
      */
-    private function getFilePathFromCache($filename, $queryString)
+    private function getFilePathFromCache(string $filename, string $queryString): mixed
     {
         // return if cache not found
         if ($this->cache == null) {
@@ -84,13 +69,13 @@ class Asset extends AbstractHelper
         }
 
         // cache key based on the filename
-        $cacheKey           = md5($filename);
+        $cacheKey           = md5(string: $filename);
         $itemIsFoundInCache = false;
         $filePath           = $this->cache->getItem($cacheKey, $itemIsFoundInCache);
 
         // if there is no element in the cache, elaborate and cache it
         if ($itemIsFoundInCache === false || $filePath === null) {
-            $filePath = $this->elaborateFilePath($filename, $queryString);
+            $filePath = $this->elaborateFilePath(filename: $filename, queryString: $queryString);
             $this->cache->setItem($cacheKey, $filePath);
         }
 
@@ -103,7 +88,7 @@ class Asset extends AbstractHelper
      * @param string $filename
      * @return string
      */
-    public function __invoke($filename)
+    public function __invoke(string $filename): string
     {
         // nothing to append
         if (empty($this->config['view_helper']['append_timestamp'])) {
@@ -124,15 +109,15 @@ class Asset extends AbstractHelper
         if (!isset($cacheConfig['options']['dir'])) {
 
             // append current timestamp to the filepath and use a custom query string
-            return $this->appendTimestamp($filename, $queryString);
+            return $this->appendTimestamp(filename: $filename, queryString: $queryString);
         }
 
         // get the filePath from the cache (if available)
-        $filePath = $this->getFilePathFromCache($filename, $queryString);
+        $filePath = $this->getFilePathFromCache(filename: $filename, queryString: $queryString);
         if ($filePath !== null) {
             return $filePath;
         }
 
-        return $this->elaborateFilePath($filename, $queryString);
+        return $this->elaborateFilePath(filename: $filename, queryString: $queryString);
     }
 }

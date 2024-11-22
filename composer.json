@@ -26,22 +26,28 @@
       "homepage": "https://jield.nl"
     }
   ],
+  "minimum-stability": "stable",
   "require": {
-    "php": "~8.1.0 || ~8.2.0 || ~8.3.0",
-    "scssphp/scssphp": "~1.12",
-    "laminas/laminas-cli": "^1.9",
-    "laminas/laminas-modulemanager": "^2.15",
-    "laminas/laminas-stdlib": "^3.18",
-    "laminas/laminas-servicemanager": "^3.22",
-    "laminas/laminas-loader": "^2.10",
-    "laminas/laminas-eventmanager": "^3.12",
-    "laminas/laminas-mvc": "^3.7",
-    "assetic/framework": "^v3.0.2"
+    "php": "~8.3.0 || ~8.4.0",
+    "scssphp/scssphp": "~1.13",
+    "laminas/laminas-cli": "^1.10",
+    "laminas/laminas-cache-storage-adapter-memory": "^2.4.x-dev",
+    "laminas/laminas-modulemanager": "^2.17",
+    "laminas/laminas-stdlib": "^3.20",
+    "laminas/laminas-servicemanager": "^3.23",
+    "laminas/laminas-loader": "^2.11",
+    "laminas/laminas-eventmanager": "^3.14",
+    "laminas/laminas-mvc": "^3.8",
+    "assetic/framework": "^v3.1"
+  },
+  "require-dev": {
+    "iteaoffice/testing": "^5.0",
+    "rector/rector": "^1.2"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "3.0-dev",
-      "dev-develop": "3.1-dev"
+      "dev-master": "4.0-dev",
+      "dev-develop": "4.1-dev"
     }
   },
   "autoload": {
@@ -53,5 +59,22 @@
     "psr-4": {
       "AssetManagerTest\\": "tests"
     }
+  },
+  "scripts": {
+    "check": [
+      "@cs",
+      "@php-lint",
+      "@phpstan"
+    ],
+    "fix": [
+      "@cbf",
+      "@cs-fix"
+    ],
+    "php-lint": "parallel-lint src",
+    "phpstan": "phpstan analyze src --level=3 --memory-limit=2G",
+    "cs": "phpcs --extensions=php,twig module",
+    "cbf": "phpcbf module --extensions=php,twig module",
+    "cs-fix": "php-cs-fixer fix -v module",
+    "test": "phpunit"
   }
 }

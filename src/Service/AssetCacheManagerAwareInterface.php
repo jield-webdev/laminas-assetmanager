@@ -16,5 +16,5 @@ interface AssetCacheManagerAwareInterface
      *
      * @return AssetCacheManager
      */
-    public function getAssetCacheManager();
+    public function getAssetCacheManager(): AssetCacheManager;
 }

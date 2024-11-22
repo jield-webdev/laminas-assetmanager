@@ -7,9 +7,9 @@ use AssetManager\Resolver\AggregateResolver;
 use AssetManager\Resolver\AggregateResolverAwareInterface;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\ResolverInterface;
-use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\FactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
+use Override;
+use Psr\Container\ContainerInterface;
 
 /**
  * Factory class for AssetManagerService
@@ -22,11 +22,13 @@ class AggregateResolverServiceFactory implements FactoryInterface
     /**
      * @inheritDoc
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    #[Override]
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): AggregateResolver
     {
-        $config         = $container->get('config');
-        $config         = isset($config['asset_manager']) ? $config['asset_manager'] : array();
-        $resolver       = new AggregateResolver();
+        $config = $container->get('config');
+        $config = $config['asset_manager'] ?? [];
+
+        $resolver = new AggregateResolver();
 
         if (empty($config['resolvers'])) {
             return $resolver;
@@ -38,7 +40,7 @@ class AggregateResolverServiceFactory implements FactoryInterface
 
             if (!$resolverService instanceof ResolverInterface) {
                 throw new Exception\RuntimeException(
-                    'Service does not implement the required interface ResolverInterface.'
+                    message: 'Service does not implement the required interface ResolverInterface.'
                 );
             }
 
@@ -52,23 +54,13 @@ class AggregateResolverServiceFactory implements FactoryInterface
 
             if ($resolverService instanceof AssetFilterManagerAwareInterface) {
                 $resolverService->setAssetFilterManager(
-                    $container->get(AssetFilterManager::class)
+                    filterManager: $container->get(AssetFilterManager::class)
                 );
             }
 
-            $resolver->attach($resolverService, $priority);
+            $resolver->attach(resolver: $resolverService, priority: $priority);
         }
 
         return $resolver;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return AggregateResolver
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
-    {
-        return $this($serviceLocator, AggregateResolver::class);
     }
 }

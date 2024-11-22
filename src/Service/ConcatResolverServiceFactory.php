@@ -3,36 +3,25 @@
 namespace AssetManager\Service;
 
 use AssetManager\Resolver\ConcatResolver;
-use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\FactoryInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
+use Override;
+use Psr\Container\ContainerInterface;
 
 class ConcatResolverServiceFactory implements FactoryInterface
 {
     /**
      * @inheritDoc
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    #[Override]
+    public function __invoke(ContainerInterface $container, $requestedName, ?array $options = null): ConcatResolver
     {
-        $config      = $container->get('config');
-        $files = array();
+        $config = $container->get('config');
+        $files  = [];
 
         if (isset($config['asset_manager']['resolver_configs']['concat'])) {
             $files = $config['asset_manager']['resolver_configs']['concat'];
         }
 
-        $concatResolver = new ConcatResolver($files);
-
-        return $concatResolver;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return ConcatResolver
-     */
-    public function createService(ServiceLocatorInterface $serviceLocator)
-    {
-        return $this($serviceLocator, ConcatResolver::class);
+        return new ConcatResolver(concats: $files);
     }
 }

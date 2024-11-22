@@ -5,6 +5,8 @@ namespace AssetManager\Cache;
 use Assetic\Contracts\Cache\CacheInterface;
 use AssetManager\Exception\RuntimeException;
 use Laminas\Stdlib\ErrorHandler;
+use Override;
+use const E_WARNING;
 
 /**
  * A file path cache. Same as FilesystemCache, except for the fact that this will create the
@@ -13,19 +15,9 @@ use Laminas\Stdlib\ErrorHandler;
 class FilePathCache implements CacheInterface
 {
     /**
-     * @var string Holds the cache directory.
-     */
-    protected $dir;
-
-    /**
-     * @var string The filename we'll be caching for.
-     */
-    protected $filename;
-
-    /**
      * @var string Holds the cachedFile string
      */
-    protected $cachedFile;
+    protected ?string $cachedFile = null;
 
     /**
      * Constructor
@@ -33,28 +25,27 @@ class FilePathCache implements CacheInterface
      * @param string $dir The directory to cache in
      * @param string $filename The filename we'll be caching for.
      */
-    public function __construct($dir, $filename)
+    public function __construct(protected string $dir, protected string $filename)
     {
-        $this->dir      = $dir;
-        $this->filename = $filename;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function has($key)
+    #[Override]
+    public function has($key): bool
     {
-        return file_exists($this->cachedFile());
+        return file_exists(filename: $this->cachedFile());
     }
 
     /**
      * Get the path-to-file.
      * @return string Cache path
      */
-    protected function cachedFile()
+    protected function cachedFile(): string
     {
         if (null === $this->cachedFile) {
-            $this->cachedFile = rtrim($this->dir, '/') . '/' . ltrim($this->filename, '/');
+            $this->cachedFile = rtrim(string: $this->dir, characters: '/') . '/' . ltrim(string: $this->filename, characters: '/');
         }
 
         return $this->cachedFile;
@@ -63,68 +54,73 @@ class FilePathCache implements CacheInterface
     /**
      * {@inheritDoc}
      */
-    public function get($key)
+    #[Override]
+    public function get($key): false|string|null
     {
         $path = $this->cachedFile();
 
-        if (!file_exists($path)) {
-            throw new RuntimeException('There is no cached value for ' . $this->filename);
+        if (!file_exists(filename: $path)) {
+            throw new RuntimeException(message: 'There is no cached value for ' . $this->filename);
         }
 
-        return file_get_contents($path);
+        return file_get_contents(filename: $path);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function set($key, $value)
+    #[Override]
+    public function set($key, $value): void
     {
-        $pathInfo = pathInfo($this->cachedFile());
+        $pathInfo = pathInfo(path: $this->cachedFile());
         $cacheDir = $pathInfo['dirname'];
         $fileName = $pathInfo['basename'];
 
         ErrorHandler::start();
 
-        if (!is_dir($cacheDir)) {
-            $umask = umask(0);
-            if (!mkdir($cacheDir, 0777, true) && !is_dir($cacheDir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $cacheDir));
+        if (!is_dir(filename: $cacheDir)) {
+            $umask = umask(mask: 0);
+            if (!mkdir(directory: $cacheDir, permissions: 0777, recursive: true) && !is_dir(filename: $cacheDir)) {
+                throw new \RuntimeException(message: sprintf('Directory "%s" was not created', $cacheDir));
             }
-            umask($umask);
+
+            umask(mask: $umask);
 
             // @codeCoverageIgnoreStart
         }
+
         // @codeCoverageIgnoreEnd
 
         ErrorHandler::stop();
 
-        if (!is_writable($cacheDir)) {
-            throw new RuntimeException('Unable to write file ' . $this->cachedFile());
+        if (!is_writable(filename: $cacheDir)) {
+            throw new RuntimeException(message: 'Unable to write file ' . $this->cachedFile());
         }
 
         // Use "rename" to achieve atomic writes
         $tmpFilePath = $cacheDir . '/AssetManagerFilePathCache_' . $fileName;
 
-        if (@file_put_contents($tmpFilePath, $value, LOCK_EX) === false) {
-            throw new RuntimeException('Unable to write file ' . $this->cachedFile());
+        if (@file_put_contents(filename: $tmpFilePath, data: $value, flags: LOCK_EX) === false) {
+            throw new RuntimeException(message: 'Unable to write file ' . $this->cachedFile());
         }
 
-        rename($tmpFilePath, $this->cachedFile());
+        rename(from: $tmpFilePath, to: $this->cachedFile());
     }
 
     /**
      * {@inheritDoc}
      */
-    public function remove($key)
+    #[Override]
+    public function remove($key): bool
     {
-        ErrorHandler::start(\E_WARNING);
+        ErrorHandler::start(errorLevel: E_WARNING);
 
-        $success = unlink($this->cachedFile());
+        $success = unlink(filename: $this->cachedFile());
 
         ErrorHandler::stop();
 
         if (false === $success) {
-            throw new RuntimeException(sprintf('Could not remove key "%s"', $this->cachedFile()));
+            throw new RuntimeException(message: sprintf('Could not remove key "%s"', $this->cachedFile()));
         }
 
         return $success;
