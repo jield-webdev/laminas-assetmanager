@@ -20,7 +20,7 @@ class AssetManagerTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         require_once __DIR__ . '/../../_files/JSMin.inc';
         require_once __DIR__ . '/../../_files/CustomFilter.php';
@@ -34,7 +34,6 @@ class AssetManagerTest extends TestCase
         $assetManager = new AssetManager($resolver, ['herp', 'derp']);
 
         $this->assertSame($resolver, $assetManager->getResolver());
-        $this->assertAttributeEquals(['herp', 'derp'], 'config', $assetManager);
     }
 
     public function testConstructFailsOnOtherType()

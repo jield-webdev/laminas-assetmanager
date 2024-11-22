@@ -38,12 +38,12 @@ class InterfaceTestResolver implements
         $this->calledMime = true;
     }
 
-    public function getMimeResolver()
+    public function getMimeResolver(): MimeResolver
     {
         return $this->calledMime;
     }
 
-    public function getAssetFilterManager()
+    public function getAssetFilterManager(): \AssetManager\Service\AssetFilterManager
     {
 
     }

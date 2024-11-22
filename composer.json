@@ -57,7 +57,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "AssetManagerTest\\": "tests"
+      "AssetManagerTest\\": "tests\\AssetManagerTest"
     }
   },
   "scripts": {
