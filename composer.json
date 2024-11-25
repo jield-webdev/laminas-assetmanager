@@ -35,7 +35,6 @@
     "laminas/laminas-modulemanager": "^2.17",
     "laminas/laminas-stdlib": "^3.20",
     "laminas/laminas-servicemanager": "^3.23",
-    "laminas/laminas-loader": "^2.11",
     "laminas/laminas-eventmanager": "^3.14",
     "laminas/laminas-mvc": "^3.8",
     "assetic/framework": "^v3.1"
