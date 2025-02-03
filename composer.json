@@ -29,7 +29,7 @@
   "minimum-stability": "stable",
   "require": {
     "php": "~8.3.0 || ~8.4.0",
-    "scssphp/scssphp": "~1.13",
+    "scssphp/scssphp": "~1.13 || ~2.0",
     "laminas/laminas-cli": "^1.10",
     "laminas/laminas-cache-storage-adapter-memory": "^2.4.x-dev",
     "laminas/laminas-modulemanager": "^2.17",
